@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'value_stream.dart';
 
 part 'sleek_value.dart';
 
@@ -12,7 +13,7 @@ typedef FromJson<T> = T Function(dynamic json);
 typedef ToJson<T> = dynamic Function(T object);
 
 class SleekStorage {
-  SleekStorage._internal(this._file, this._rawData);
+  SleekStorage._internal(this._file, this._rawData, this.lastSavedAt);
 
   static const _valuesKey = 'values';
   static const _boxesKey = 'boxes';
@@ -29,6 +30,10 @@ class SleekStorage {
   /// All opened boxes.
   final Map<String, SleekBox> _boxes = {};
 
+  /// A stream that emits the last saved date of the storage, when it is saved to disk.
+  /// You could listen to this stream to know when storage is saved to disk.
+  final DataStream<DateTime> lastSavedAt;
+
   /// Loads and parses the storage from disk, inside the directory at [directoryPath].
   /// Returns a [SleekStorage] instance.
   ///
@@ -44,8 +49,11 @@ class SleekStorage {
       _boxesKey: JsonObject(),
     };
 
+    // Get last saved date
+    final lastSavedAt = DataStream<DateTime>(await file.lastModified());
+
     // Create and return the SleekStorage instance
-    return SleekStorage._internal(file, data);
+    return SleekStorage._internal(file, data, lastSavedAt);
   }
 
   /// Get or create a box named [boxName].
@@ -97,9 +105,15 @@ class SleekStorage {
   /// This is automatically called when any data is modified, executed at the next current event loop.
   /// Call this method to ensure all changes are saved immediately.
   /// Returns a [Future] that completes when the data is written.
-  Future<void> flush() {
+  Future<void> flush() async {
     _flushScheduled = false;
-    return _saveToFile(_rawData, _file);
+    await _saveToFile(_rawData, _file);
+    lastSavedAt.add(await _file.lastModified());
+  }
+
+  /// Close the storage, releasing any resources.
+  void close() {
+    lastSavedAt.close();
   }
 
   static Future<JsonObject?> _readFromFileSafe(File file) async {

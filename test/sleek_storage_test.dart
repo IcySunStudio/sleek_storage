@@ -25,7 +25,7 @@ void main() async {
       expect(value, intValue);
 
       // Check if the value is saved correctly
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));   // TODO find a better way to ensure the file is saved
       storage = await SleekStorage.getInstance(testDir.path);
       box = storage.box<int>(name);
       value = box.get('key1');
@@ -46,11 +46,40 @@ void main() async {
       expect(value, intValue);
 
       // Check if the value is saved correctly
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));   // TODO find a better way to ensure the file is saved
       storage = await SleekStorage.getInstance(testDir.path);
       holder = storage.value<int>(name);
       value = holder.value;
       expect(value, intValue);
+    });
+    test('Multiple grouped modifications', () async {
+      // Create a SleekStorage instance
+      var storage = await SleekStorage.getInstance(testDir.path);
+
+      // Listen to storage saves
+      var saveCount = 0;
+      storage.lastSavedAt.listen((event) => saveCount++);
+
+      // Open box
+      const name = 'testBox';
+      var box = storage.box<int>(name);
+      expect(box.key, name);
+
+      // Add value
+      box.put('key1', intValue);
+      box.put('key2', intValue);
+      box.put('key3', intValue);
+
+      // Check if the value is saved correctly
+      await Future.delayed(const Duration(seconds: 1));   // TODO find a better way to ensure the file is saved
+      storage = await SleekStorage.getInstance(testDir.path);
+      box = storage.box<int>(name);
+      expect(box.get('key1'), intValue);
+      expect(box.get('key2'), intValue);
+      expect(box.get('key3'), intValue);
+
+      // Ensure that only one save was triggered
+      expect(saveCount, 1);
     });
   });
 }

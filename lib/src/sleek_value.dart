@@ -71,10 +71,3 @@ class SleekBox<T> extends _SleekValueBase<T> {
       key: _toJson(value),
   };
 }
-
-extension _SleekValueBaseIterable on Iterable<_SleekValueBase> {
-  JsonObject toJson() => {
-    for (final value in this)
-      value.key: value._encode(),
-  };
-}
