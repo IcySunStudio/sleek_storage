@@ -6,15 +6,10 @@ issue_tracker: https://github.com/IcySunStudio/sleek_storage/issues
 
 environment:
   sdk: ^3.0.0
-  flutter: ">=1.17.0"
 
 dependencies:
-  flutter:    # Needed for path_provider
-    sdk: flutter
   path: ^1.9.1
-  path_provider: ^2.1.5
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  test: ^1.26.2
   flutter_lints: ^6.0.0

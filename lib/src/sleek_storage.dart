@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 
 part 'sleek_box.dart';
 
@@ -28,14 +27,14 @@ class SleekStorage {
   );
   final Map<String, SleekBox> _boxes = {};
 
-  /// Loads and parses the storage from disk.
+  /// Loads and parses the storage from disk, inside the directory at [directoryPath].
   /// Returns a [SleekStorage] instance.
   ///
   /// Because this is reading from disk, it shouldn't be awaited in
   /// performance-sensitive blocks.
-  static Future<SleekStorage> getInstance() async {
+  static Future<SleekStorage> getInstance(String directoryPath) async {
     // Get file instance
-    final file = await _getFile();
+    final file = File(path.join(directoryPath, 'sleek.json'));
 
     // Load the file
     final data = await _readFromFileSafe(file) ?? {
@@ -76,11 +75,6 @@ class SleekStorage {
 
     // Save to file
     await _saveToFile(_rawData, _file);
-  }
-
-  static Future<File> _getFile() async {
-    final directory = await getApplicationSupportDirectory();
-    return File(path.join(directory.path, 'sleek.json'));
   }
 
   static Future<JsonObject?> _readFromFileSafe(File file) async {
