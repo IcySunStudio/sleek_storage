@@ -13,6 +13,8 @@ sealed class _SleekValueBase<T> {
   final SleekStorage _storage;
   final ToJson<T> _toJson;
 
+  void clear();
+
   dynamic _encode();
 
   void _save() => _storage._save(_rootKey, key, _encode());
@@ -28,12 +30,18 @@ class SleekValue<T> extends _SleekValueBase<T> {
 
   T? _value;
 
+  /// Get the current value.
   T? get value => _value;
 
-  void set(T value) {
+  /// Set new [value].
+  /// Set it to null to clear the value.
+  void set(T? value) {
     _value = value;
     _save();
   }
+
+  @override
+  void clear() => set(null);
 
   @override
   dynamic _encode() => _value != null ? _toJson(_value as T) : null;
@@ -52,6 +60,9 @@ class SleekBox<T> extends _SleekValueBase<T> {
 
   final Map<String, T> _data;
 
+  /// List all keys in the box.
+  List<String> get keys => _data.keys.toList();
+
   /// Returns the value associated with the given [key].
   /// Or if the key does not exist:
   /// - [defaultValue] if specified,
@@ -61,6 +72,19 @@ class SleekBox<T> extends _SleekValueBase<T> {
   /// Saves the [value] at the [key] in the box.
   void put(String key, T value) {
     _data[key] = value;
+    _save();
+  }
+
+  /// Delete the value at the given [key] in the box.
+  void delete(String key) {
+    _data.remove(key);
+    _save();
+  }
+
+  /// Clear all values in the box.
+  @override
+  void clear() {
+    _data.clear();
     _save();
   }
 

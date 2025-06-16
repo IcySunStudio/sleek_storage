@@ -86,6 +86,12 @@ class SleekStorage {
     ) as SleekValue<T>;
   }
 
+  /// List all keys of the [SleekValue]s.
+  List<String> getAllValuesKeys() => _rawData[_valuesKey].keys.toList();
+
+  /// List all keys of the [SleekBox]es.
+  List<String> getAllBoxesKeys() => _rawData[_boxesKey].keys.toList();
+
   /// Commit change to storage, and ask to save to disk.
   void _save(String rootKey, String key, dynamic jsonValue) async {
     // Save changed value
