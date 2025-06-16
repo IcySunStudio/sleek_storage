@@ -2,8 +2,8 @@ part of 'sleek_storage.dart';
 
 T _identity<T>(dynamic object) => object as T;
 
-sealed class SleekValueBase<T> {
-  SleekValueBase(this.key, this._storage, ToJson<T>? toJson):
+sealed class _SleekValueBase<T> {
+  _SleekValueBase(this.key, this._storage, ToJson<T>? toJson):
       _toJson = toJson ?? _identity;
 
   final String key;
@@ -14,7 +14,8 @@ sealed class SleekValueBase<T> {
   dynamic _encode();
 }
 
-class SleekValue<T> extends SleekValueBase<T> {
+/// A single value stored in the [SleekStorage].
+class SleekValue<T> extends _SleekValueBase<T> {
   SleekValue._internal(super.key, super._storage, dynamic data, FromJson<T>? fromJson, super.toJson):
       _value = data != null ? (fromJson ?? _identity)(data) : null;
 
@@ -31,7 +32,8 @@ class SleekValue<T> extends SleekValueBase<T> {
   dynamic _encode() => _value != null ? _toJson(_value as T) : null;
 }
 
-class SleekBox<T> extends SleekValueBase<T> {
+/// A collection of key-value pairs stored in the [SleekStorage].
+class SleekBox<T> extends _SleekValueBase<T> {
   SleekBox._internal(super.key, super._storage, JsonObject? data, FromJson<T>? fromJson, super.toJson):
       _data = {
         for (final MapEntry(:key, :value) in (data ?? const {}).entries)
@@ -60,7 +62,7 @@ class SleekBox<T> extends SleekValueBase<T> {
   };
 }
 
-extension SleekValueBaseIterable on Iterable<SleekValueBase> {
+extension _SleekValueBaseIterable on Iterable<_SleekValueBase> {
   JsonObject toJson() => {
     for (final value in this)
       value.key: value._encode(),
