@@ -2,18 +2,41 @@ part of 'sleek_storage.dart';
 
 T _identity<T>(dynamic object) => object as T;
 
-class SleekBox<T> {
-  SleekBox._internal(this.name, this._storage, JsonObject? data, FromJson<T>? fromJson, ToJson<T>? toJson):
-      _toJson = toJson ?? _identity,
+sealed class SleekValueBase<T> {
+  SleekValueBase(this.key, this._storage, ToJson<T>? toJson):
+      _toJson = toJson ?? _identity;
+
+  final String key;
+
+  final SleekStorage _storage;
+  final ToJson<T> _toJson;
+
+  dynamic _encode();
+}
+
+class SleekValue<T> extends SleekValueBase<T> {
+  SleekValue._internal(super.key, super._storage, dynamic data, FromJson<T>? fromJson, super.toJson):
+      _value = data != null ? (fromJson ?? _identity)(data) : null;
+
+  T? _value;
+
+  T? get value => _value;
+
+  Future<void> set(T value) {
+    _value = value;
+    return _storage._save();
+  }
+
+  @override
+  dynamic _encode() => _value != null ? _toJson(_value as T) : null;
+}
+
+class SleekBox<T> extends SleekValueBase<T> {
+  SleekBox._internal(super.key, super._storage, JsonObject? data, FromJson<T>? fromJson, super.toJson):
       _data = {
         for (final MapEntry(:key, :value) in (data ?? const {}).entries)
           key: (fromJson ?? _identity)(value),
       };
-
-  final String name;
-
-  final SleekStorage _storage;
-  final ToJson<T> _toJson;
 
   final Map<String, T> _data;
 
@@ -30,30 +53,16 @@ class SleekBox<T> {
   }
 
   // TODO we could avoid re-encoding values that didn't change since last encoding
+  @override
   JsonObject _encode() => {
     for (final MapEntry(:key, :value) in _data.entries)
       key: _toJson(value),
   };
 }
 
-class SleekValue<T> {
-  SleekValue._internal(this.key, this._storage, dynamic data, FromJson<T>? fromJson, ToJson<T>? toJson):
-      _toJson = toJson ?? _identity,
-      _value = data != null ? (fromJson ?? _identity)(data) : null;
-
-  final String key;
-
-  final SleekStorage _storage;
-  final ToJson<T> _toJson;
-
-  T? _value;
-
-  T? get value => _value;
-
-  Future<void> set(T value) {
-    _value = value;
-    return _storage._save();
-  }
-
-  dynamic _encode() => _value != null ? _toJson(_value as T) : null;
+extension SleekValueBaseIterable on Iterable<SleekValueBase> {
+  JsonObject toJson() => {
+    for (final value in this)
+      value.key: value._encode(),
+  };
 }

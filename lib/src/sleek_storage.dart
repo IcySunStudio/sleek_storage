@@ -14,7 +14,7 @@ typedef ToJson<T> = dynamic Function(T object);
 class SleekStorage {
   SleekStorage._internal(this._file, this._rawData);
 
-  static const _rootKey = 'root';
+  static const _valuesKey = 'values';
   static const _boxesKey = 'boxes';
 
   final File _file;
@@ -35,7 +35,7 @@ class SleekStorage {
 
     // Load the file
     final data = await _readFromFileSafe(file) ?? {
-      _rootKey: JsonObject(),
+      _valuesKey: JsonObject(),
       _boxesKey: JsonObject(),
     };
 
@@ -66,7 +66,7 @@ class SleekStorage {
       () => SleekValue<T>._internal(
         key,
         this,
-        _rawData[_rootKey][key],
+        _rawData[_valuesKey][key],
         fromJson,
         toJson,
       ),
@@ -77,14 +77,8 @@ class SleekStorage {
   Future<void> _save() async {
     // Encode all
     _rawData = {
-      _rootKey: {
-        for (final value in _values.values)
-          value.key: value._encode(),
-      },
-      _boxesKey: {
-        for (final box in _boxes.values)
-          box.name: box._encode(),
-      },
+      _valuesKey: _values.values.toJson(),
+      _boxesKey: _boxes.values.toJson(),
     };
 
     // Save to file

@@ -17,7 +17,7 @@ void main() async {
       // Open box
       const name = 'testBox';
       var box = storage.box<int>(name);
-      expect(box.name, name);
+      expect(box.key, name);
 
       // Add value
       await box.put('key1', intValue);
