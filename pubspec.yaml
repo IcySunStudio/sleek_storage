@@ -1,0 +1,20 @@
+name: sleek_storage
+description: "Simple, reactive and lightweight key-value store that saves data in a JSON file"
+version: 0.0.1
+repository: https://github.com/IcySunStudio/sleek_storage
+issue_tracker: https://github.com/IcySunStudio/sleek_storage/issues
+
+environment:
+  sdk: ^3.0.0
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:    # Needed for path_provider
+    sdk: flutter
+  path: ^1.9.1
+  path_provider: ^2.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
