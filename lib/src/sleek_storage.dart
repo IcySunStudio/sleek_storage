@@ -8,6 +8,9 @@ part 'sleek_box.dart';
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
 
+typedef FromJson<T> = T Function(dynamic json);
+typedef ToJson<T> = dynamic Function(T object);
+
 class SleekStorage {
   SleekStorage._internal(this._file, this._rawData);
 
@@ -18,13 +21,7 @@ class SleekStorage {
 
   JsonObject _rawData;
 
-  late final SleekBox<dynamic> _rootBox = SleekBox._internal(
-    this,
-    _rawData[_rootKey],
-    _rootKey,
-    (json) => json,   // TODO
-    (object) => object, // TODO
-  );
+  final Map<String, SleekValue> _values = {};
   final Map<String, SleekBox> _boxes = {};
 
   /// Loads and parses the storage from disk, inside the directory at [directoryPath].
@@ -38,8 +35,8 @@ class SleekStorage {
 
     // Load the file
     final data = await _readFromFileSafe(file) ?? {
-      _rootKey: {},
-      _boxesKey: {},
+      _rootKey: JsonObject(),
+      _boxesKey: JsonObject(),
     };
 
     // Create and return the SleekStorage instance
@@ -53,23 +50,40 @@ class SleekStorage {
     return _boxes.putIfAbsent(
       boxName,
       () => SleekBox<T>._internal(
+        boxName,
         this,
         _rawData[_boxesKey][boxName],
-        boxName,
         fromJson,
         toJson,
       ),
     ) as SleekBox<T>;
   }
 
+  /// Get or create a [SleekValue] for the given [key].
+  SleekValue<T> value<T>(String key, {FromJson<T>? fromJson, ToJson<T>? toJson}) {
+    return _values.putIfAbsent(
+      key,
+      () => SleekValue<T>._internal(
+        key,
+        this,
+        _rawData[_rootKey][key],
+        fromJson,
+        toJson,
+      ),
+    ) as SleekValue<T>;
+  }
+
   /// Saves the current storage data to disk.
   Future<void> _save() async {
     // Encode all
     _rawData = {
-      _rootKey: _rootBox._encode(),
+      _rootKey: {
+        for (final value in _values.values)
+          value.key: value._encode(),
+      },
       _boxesKey: {
-        for (final entry in _boxes.entries)
-          entry.key: entry.value._encode(),
+        for (final box in _boxes.values)
+          box.name: box._encode(),
       },
     };
 
