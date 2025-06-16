@@ -17,11 +17,16 @@ class SleekStorage {
   static const _valuesKey = 'values';
   static const _boxesKey = 'boxes';
 
+  /// The file where the storage is saved.
   final File _file;
 
-  JsonObject _rawData;
+  /// Serialized data of the storage.
+  final JsonObject _rawData;
 
+  /// All opened values.
   final Map<String, SleekValue> _values = {};
+
+  /// All opened boxes.
   final Map<String, SleekBox> _boxes = {};
 
   /// Loads and parses the storage from disk, inside the directory at [directoryPath].
@@ -73,16 +78,28 @@ class SleekStorage {
     ) as SleekValue<T>;
   }
 
-  /// Saves the current storage data to disk.
-  Future<void> _save() async {
-    // Encode all
-    _rawData = {
-      _valuesKey: _values.values.toJson(),
-      _boxesKey: _boxes.values.toJson(),
-    };
+  /// Commit change to storage, and ask to save to disk.
+  void _save(String rootKey, String key, dynamic jsonValue) async {
+    // Save changed value
+    _rawData[rootKey][key] = jsonValue;
 
-    // Save to file
-    await _saveToFile(_rawData, _file);
+    // Ask flush at the next event loop
+    if (!_flushScheduled) {
+      Future.delayed(Duration.zero, flush);
+      _flushScheduled = true;
+    }
+  }
+
+  /// Whether a flush is scheduled at next event loop.
+  bool _flushScheduled = false;
+
+  /// Write the current storage data to disk.
+  /// This is automatically called when any data is modified, executed at the next current event loop.
+  /// Call this method to ensure all changes are saved immediately.
+  /// Returns a [Future] that completes when the data is written.
+  Future<void> flush() {
+    _flushScheduled = false;
+    return _saveToFile(_rawData, _file);
   }
 
   static Future<JsonObject?> _readFromFileSafe(File file) async {

@@ -20,11 +20,12 @@ void main() async {
       expect(box.key, name);
 
       // Add value
-      await box.put('key1', intValue);
+      box.put('key1', intValue);
       var value = box.get('key1');
       expect(value, intValue);
 
       // Check if the value is saved correctly
+      await Future.delayed(const Duration(seconds: 1));
       storage = await SleekStorage.getInstance(testDir.path);
       box = storage.box<int>(name);
       value = box.get('key1');
@@ -40,11 +41,12 @@ void main() async {
       expect(holder.key, name);
 
       // Set value
-      await holder.set(intValue);
+      holder.set(intValue);
       var value = holder.value;
       expect(value, intValue);
 
       // Check if the value is saved correctly
+      await Future.delayed(const Duration(seconds: 1));
       storage = await SleekStorage.getInstance(testDir.path);
       holder = storage.value<int>(name);
       value = holder.value;
