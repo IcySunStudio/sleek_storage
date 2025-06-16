@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:test/test.dart';
@@ -24,8 +25,16 @@ void main() async {
       var value = box.get('key1');
       expect(value, intValue);
 
+      // Wait for the value to be written to disk
+      final completer = Completer<void>();
+      storage.lastSavedAt.listen((_) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
+      await completer.future;  // Wait until the value is saved
+
       // Check if the value is saved correctly
-      await Future.delayed(const Duration(seconds: 1));   // TODO find a better way to ensure the file is saved
       storage = await SleekStorage.getInstance(testDir.path);
       box = storage.box<int>(name);
       value = box.get('key1');
@@ -45,8 +54,16 @@ void main() async {
       var value = holder.value;
       expect(value, intValue);
 
+      // Wait for the value to be written to disk
+      final completer = Completer<void>();
+      storage.lastSavedAt.listen((_) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
+      await completer.future;  // Wait until the value is saved
+
       // Check if the value is saved correctly
-      await Future.delayed(const Duration(seconds: 1));   // TODO find a better way to ensure the file is saved
       storage = await SleekStorage.getInstance(testDir.path);
       holder = storage.value<int>(name);
       value = holder.value;
@@ -70,8 +87,16 @@ void main() async {
       box.put('key2', intValue);
       box.put('key3', intValue);
 
+      // Wait for the value to be written to disk
+      final completer = Completer<void>();
+      storage.lastSavedAt.listen((_) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
+      await completer.future;  // Wait until the value is saved
+
       // Check if the value is saved correctly
-      await Future.delayed(const Duration(seconds: 1));   // TODO find a better way to ensure the file is saved
       storage = await SleekStorage.getInstance(testDir.path);
       box = storage.box<int>(name);
       expect(box.get('key1'), intValue);
