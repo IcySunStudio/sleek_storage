@@ -18,19 +18,23 @@ sealed class _SleekValueBase<T> {
   /// Release all associated resources.
   void close();
 
-  dynamic _encode();
+  dynamic _serialize();
 
-  void _save() => _storage._save(_rootKey, key, _encode());
+  void _save() => _storage._save(_rootKey, key, _serialize());
 }
 
 /// A single value stored in the [SleekStorage].
 class SleekValue<T> extends _SleekValueBase<T> {
-  SleekValue._internal(super.key, super._storage, dynamic data, FromJson<T>? fromJson, super.toJson):
-      _value = data != null ? (fromJson ?? _identity)(data) : null;
+  SleekValue._internal(super.key, super._storage, this._serializedValue, FromJson<T>? fromJson, super.toJson):
+      _value = _serializedValue != null ? (fromJson ?? _identity)(_serializedValue) : null;
 
   @override
   String get _rootKey => SleekStorage._valuesKey;
 
+  /// Encoded value
+  dynamic _serializedValue;
+
+  /// Decoded value
   T? _value;
 
   DataStream<T?>? _stream;
@@ -46,7 +50,9 @@ class SleekValue<T> extends _SleekValueBase<T> {
 
   /// Set new [value].
   /// Set it to null to clear the value.
+  /// [value] is serialized immediately, throwing if it fails.
   void set(T? value) {
+    _serializedValue = _value != null ? _toJson(_value as T) : null;
     _value = value;
     _stream?.add(value);
     _save();
@@ -59,12 +65,13 @@ class SleekValue<T> extends _SleekValueBase<T> {
   void close() => _stream?.close();
 
   @override
-  dynamic _encode() => _value != null ? _toJson(_value as T) : null;
+  dynamic _serialize() => _serializedValue;
 }
 
 /// A collection of key-value pairs stored in the [SleekStorage].
 class SleekBox<T> extends _SleekValueBase<T> {
   SleekBox._internal(super.key, super._storage, JsonObject? data, FromJson<T>? fromJson, super.toJson):
+      _serializedData = data ?? {},
       _data = {
         for (final MapEntry(:key, :value) in (data ?? const {}).entries)
           key: (fromJson ?? _identity)(value),
@@ -73,9 +80,18 @@ class SleekBox<T> extends _SleekValueBase<T> {
   @override
   String get _rootKey => SleekStorage._boxesKey;
 
+  /// Data stored in the box, encoded
+  final JsonObject _serializedData;
+
+  /// Data stored in the box, decoded
   final Map<String, T> _data;
 
+  /// Stream that emits all values in the box when any changes.
+  /// Lazily created when [watchAll] is called.
   DataStream<List<T>>? _stream;
+
+  /// Map of created streams
+  /// Lazily created when [watch] is called.
   final Map<String, DataStream<T?>> _streams = {};
 
 
@@ -98,7 +114,10 @@ class SleekBox<T> extends _SleekValueBase<T> {
   DataStream<List<T>> watchAll() => _stream ??= DataStream<List<T>>(getAll());
 
   /// Saves the [value] at the [key] in the box.
+  /// If the [key] already exists, it will be overwritten.
+  /// [value] is serialized immediately, throwing if it fails.
   void put(String key, T value) {
+    _serializedData[key] = _toJson(value);
     _data[key] = value;
     _streams[key]?.add(value);
     _updateStream();
@@ -107,6 +126,7 @@ class SleekBox<T> extends _SleekValueBase<T> {
 
   /// Delete the value at the given [key] in the box.
   void delete(String key) {
+    _serializedData.remove(key);
     _data.remove(key);
     _closeStream(key);
     _updateStream();
@@ -116,6 +136,7 @@ class SleekBox<T> extends _SleekValueBase<T> {
   /// Clear all values in the box.
   @override
   void clear() {
+    _serializedData.clear();
     _data.clear();
     _closeAllStreams();
     _updateStream();
@@ -139,10 +160,6 @@ class SleekBox<T> extends _SleekValueBase<T> {
     _streams.clear();
   }
 
-  // TODO we could avoid re-encoding values that didn't change since last encoding using basic memory cache system
   @override
-  JsonObject _encode() => {
-    for (final MapEntry(:key, :value) in _data.entries)
-      key: _toJson(value),
-  };
+  JsonObject _serialize() => _serializedData;
 }

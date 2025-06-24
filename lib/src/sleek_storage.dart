@@ -12,6 +12,13 @@ typedef JsonList = Iterable<dynamic>;
 typedef FromJson<T> = T Function(dynamic json);
 typedef ToJson<T> = dynamic Function(T object);
 
+/// Storage system that allows you to store values and boxes in a JSON file.
+///
+/// You can create boxes to store multiple values of the same type, or use single values directly.
+/// You can listen to changes in values and boxes using the watch method.
+///
+/// At each modification, data is serialized to Dart-native objects immediately,
+/// then on the next event loop, it's encoded in JSON String and written to disk, in a JSON file.
 class SleekStorage {
   SleekStorage._internal(this._file, this._rawData, this.lastSavedAt);
 
@@ -137,7 +144,7 @@ class SleekStorage {
   }
 
   static Future<void> _saveToFile(JsonObject data, File file) async {   // TODO what happens if we call this while another write is in progress? Handle it.
-    final dataString = json.encode(data);   // TODO encode at field-level at each put(), to ensure error is thrown at the right time ?
+    final dataString = json.encode(data);   // TODO handle errors
 
     // Write to a temporary file first, then rename it to avoid data corruption
     final tempFile = File('${file.path}.tmp');
