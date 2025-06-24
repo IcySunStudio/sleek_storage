@@ -38,6 +38,9 @@ class SleekValue<T> extends _SleekValueBase<T> {
   /// Get the current value.
   T? get value => _value;
 
+  /// Same as [set]
+  set value(T? newValue) => set(newValue);
+
   /// Returns a [DataStream] that emits the value when it changes.
   DataStream<T?> watch() => _stream ??= DataStream(value);
 
