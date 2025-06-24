@@ -136,8 +136,8 @@ class SleekStorage {
     return null;
   }
 
-  static Future<void> _saveToFile(JsonObject data, File file) async {
-    final dataString = json.encode(data);   // TODO encode at field-level at each set, to ensure data integrity ?
+  static Future<void> _saveToFile(JsonObject data, File file) async {   // TODO what happens if we call this while another write is in progress? Handle it.
+    final dataString = json.encode(data);   // TODO encode at field-level at each put(), to ensure error is thrown at the right time ?
 
     // Write to a temporary file first, then rename it to avoid data corruption
     final tempFile = File('${file.path}.tmp');

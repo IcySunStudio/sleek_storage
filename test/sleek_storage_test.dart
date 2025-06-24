@@ -9,9 +9,9 @@ void main() async {
   final testDir = Directory.systemTemp;
 
   // Tests
-  group('Test', () {
+  group('Tests', () {
     const intValue = 42;
-    test('Test Box', () async {
+    test('Box', () async {
       // Create a SleekStorage instance
       var storage = await SleekStorage.getInstance(testDir.path);
 
@@ -40,7 +40,7 @@ void main() async {
       value = box.get('key1');
       expect(value, intValue);
     });
-    test('Test Value', () async {
+    test('Value', () async {
       // Create a SleekStorage instance
       var storage = await SleekStorage.getInstance(testDir.path);
 
@@ -105,6 +105,25 @@ void main() async {
 
       // Ensure that only one save was triggered
       expect(saveCount, 1);
+    });
+    test('Box.watch', () async {
+      // Create a SleekStorage instance
+      var storage = await SleekStorage.getInstance(testDir.path);
+
+      // Open box
+      const name = 'testBox';
+      var box = storage.box<int>(name);
+      expect(box.key, name);
+
+      // Add first value
+      box.put('key1', 40);
+
+      // Listen to changes
+      expectLater(box.watch('key1').innerStream, emitsInOrder([50, 51]));
+
+      // Change value
+      box.put('key1', 50);
+      box.put('key1', 51);
     });
   });
 }
