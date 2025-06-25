@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'value_stream.dart';
+import 'package:value_stream/value_stream.dart';
 
 part 'sleek_value.dart';
 
