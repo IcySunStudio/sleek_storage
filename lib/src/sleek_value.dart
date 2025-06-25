@@ -94,6 +94,8 @@ class SleekBox<T> extends _SleekValueBase<T> {
   /// Lazily created when [watch] is called.
   final Map<String, DataStream<T?>> _streams = {};
 
+  /// Get the number of items in the box.
+  int get length => _data.length;
 
   /// List all keys in the box.
   List<String> get keys => _data.keys.toList();
