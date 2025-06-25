@@ -43,13 +43,14 @@ class SleekStorage {
   final DataStream<DateTime?> lastSavedAt;
 
   /// Loads and parses the storage from disk, inside the directory at [directoryPath].
+  /// You can optionally specify a [storageName] to use a different file name.
   /// Returns a [SleekStorage] instance.
   ///
   /// Because this is reading from disk, it shouldn't be awaited in
   /// performance-sensitive blocks.
-  static Future<SleekStorage> getInstance(String directoryPath) async {
+  static Future<SleekStorage> getInstance(String directoryPath, {String? storageName}) async {
     // Get file instance
-    final file = File(path.join(directoryPath, 'sleek.json'));
+    final file = _getStorageFile(directoryPath, storageName);
 
     // Load the file
     final data = await _readFromFileSafe(file) ?? {
@@ -64,6 +65,8 @@ class SleekStorage {
     // Create and return the SleekStorage instance
     return SleekStorage._internal(file, data, lastSavedAt);
   }
+
+  static File _getStorageFile(String directoryPath, [String? storageName]) => File(path.join(directoryPath, '${storageName ?? 'sleek'}.json'));
 
   /// Get or create a box named [boxName].
   /// All items of the box must be of the same type [T].
