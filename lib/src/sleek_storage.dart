@@ -134,6 +134,14 @@ class SleekStorage {
     lastSavedAt.close();
   }
 
+  /// Delete the storage file from disk.
+  static Future<void> deleteStorage(String directoryPath, {String? storageName}) async {
+    final file = _getStorageFile(directoryPath, storageName);
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
+
   static Future<JsonObject?> _readFromFileSafe(File file) async {
     try {
       if (await file.exists()) {
