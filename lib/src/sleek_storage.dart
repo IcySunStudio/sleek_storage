@@ -39,7 +39,8 @@ class SleekStorage {
 
   /// A stream that emits the last saved date of the storage, when it is saved to disk.
   /// You could listen to this stream to know when storage is saved to disk.
-  final DataStream<DateTime> lastSavedAt;
+  /// Value is null if the storage has never been saved.
+  final DataStream<DateTime?> lastSavedAt;
 
   /// Loads and parses the storage from disk, inside the directory at [directoryPath].
   /// Returns a [SleekStorage] instance.
@@ -57,7 +58,8 @@ class SleekStorage {
     };
 
     // Get last saved date
-    final lastSavedAt = DataStream<DateTime>(await file.lastModified());
+    final lastModifiedAt = await file.exists() ? await file.lastModified() : null;
+    final lastSavedAt = DataStream<DateTime?>(lastModifiedAt);
 
     // Create and return the SleekStorage instance
     return SleekStorage._internal(file, data, lastSavedAt);
