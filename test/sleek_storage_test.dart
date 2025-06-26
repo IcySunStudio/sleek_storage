@@ -15,7 +15,8 @@ void main() async {
   }
 
   // Tests
-  group('Basic tests', () {
+  group('Tests', () {
+    // --- Basic tests ---
     const intValue = 42;
     test('Box', () async {
       // Create a SleekStorage instance
@@ -131,9 +132,8 @@ void main() async {
       box.put('key1', 50);
       box.put('key1', 51);
     });
-  });
 
-  group('Advanced tests', () {
+    // --- Advanced tests ---
     test('Complex object', () async {
       // Create a SleekStorage instance
       var storage = await setUp();

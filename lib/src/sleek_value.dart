@@ -52,7 +52,7 @@ class SleekValue<T> extends _SleekValueBase<T> {
   /// Set it to null to clear the value.
   /// [value] is serialized immediately, throwing if it fails.
   void set(T? value) {
-    _serializedValue = _value != null ? _toJson(_value as T) : null;
+    _serializedValue = value != null ? _toJson(value) : null;
     _value = value;
     _stream?.add(value);
     _save();
