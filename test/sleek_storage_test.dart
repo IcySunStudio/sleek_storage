@@ -33,13 +33,7 @@ void main() async {
       expect(value, intValue);
 
       // Wait for the value to be written to disk
-      final completer = Completer<void>();
-      storage.lastSavedAt.listen((_) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      });
-      await completer.future;  // Wait until the value is saved
+      await storage.lastSavedAt.next;
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
@@ -62,13 +56,7 @@ void main() async {
       expect(value, intValue);
 
       // Wait for the value to be written to disk
-      final completer = Completer<void>();
-      storage.lastSavedAt.listen((_) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      });
-      await completer.future;  // Wait until the value is saved
+      await storage.lastSavedAt.next;
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
@@ -95,13 +83,7 @@ void main() async {
       box.put('key3', intValue);
 
       // Wait for the value to be written to disk
-      final completer = Completer<void>();
-      storage.lastSavedAt.listen((_) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      });
-      await completer.future;  // Wait until the value is saved
+      await storage.lastSavedAt.next;
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
@@ -131,6 +113,9 @@ void main() async {
       // Change value
       box.put('key1', 50);
       box.put('key1', 51);
+
+      // Wait for the value to be written to disk
+      await storage.lastSavedAt.next;
     });
 
     // --- Advanced tests ---
@@ -149,13 +134,7 @@ void main() async {
       expect(value, myObject);
 
       // Wait for the value to be written to disk
-      final completer = Completer<void>();
-      storage.lastSavedAt.listen((_) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      });
-      await completer.future;  // Wait until the value is saved
+      await storage.lastSavedAt.next;
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
@@ -180,14 +159,8 @@ void main() async {
       }
 
       // Wait for the value to be written to disk
-      final completer = Completer<void>();
-      storage.lastSavedAt.listen((_) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      });
       var stopwatch = Stopwatch()..start();
-      await completer.future;  // Wait until the value is saved
+      await storage.lastSavedAt.next;
       print('Time taken to save $length objects: ${stopwatch.elapsedMilliseconds} ms');
 
       // Check if the value is saved correctly
