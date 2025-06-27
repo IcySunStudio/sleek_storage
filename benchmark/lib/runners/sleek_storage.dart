@@ -1,14 +1,11 @@
-import 'dart:io';
-
 import 'package:sleek_storage/sleek_storage.dart';
 import 'package:sleek_storage_benchmark/bench_result.dart';
 
-import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 import 'runner.dart';
 
-class SleekStorageRunner implements BenchmarkRunner {
+class SleekStorageRunner extends BenchmarkRunner {
   const SleekStorageRunner();
 
   @override

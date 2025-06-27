@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'runner.dart';
 
-class HiveRunner implements BenchmarkRunner {
+class HiveRunner extends BenchmarkRunner {
   const HiveRunner();
 
   @override

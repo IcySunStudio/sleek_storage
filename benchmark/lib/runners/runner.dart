@@ -5,6 +5,8 @@ abstract class BenchmarkRunner {
 
   String get name;
 
+  int? get maxOperations => null;
+
   Future<BenchResult> run(String data, int operations);
 }
 

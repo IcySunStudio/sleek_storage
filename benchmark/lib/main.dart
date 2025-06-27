@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 import 'package:csv/csv.dart';
 import 'package:sleek_storage_benchmark/bench_result.dart';
+import 'package:sleek_storage_benchmark/models/test_model_advanced.dart';
 import 'package:sleek_storage_benchmark/runners/hive.dart';
 import 'package:sleek_storage_benchmark/runners/shared_preferences.dart';
 import 'package:sleek_storage_benchmark/runners/sleek_storage.dart';
@@ -13,15 +15,17 @@ void main() async {
 
   // Run benchmarks
   await _runBenchmarks();
+
+  // Exit the app when done
+  exit(0);
 }
 
 
 const benchmarks = [
-  100,
   1000,
-  /*10000,
+  10000,
   100000,
-  1000000,*/    // TODO
+  1000000,
 ];
 
 const competitors = [
@@ -35,10 +39,17 @@ Future<void> _runBenchmarks() async {
     print('--- Running benchmarks for $operations operations ---');
     final results = <String, BenchResult>{};
 
+    // Encode data
+    final data = json.encode(TestModelAdvanced.random(2).toJson());
+
     // Run all benchmarks
     for (final competitor in competitors) {
+      if (competitor.maxOperations != null && operations > competitor.maxOperations!) {
+        print('Skipping ${competitor.name} for $operations operations (max: ${competitor.maxOperations})');
+        continue;
+      }
       print('Running ${competitor.name}...');
-      final result = await competitor.run('test_data', operations);   // TODO use models
+      final result = await competitor.run(data, operations);
       results[competitor.name] = result;
       print('${competitor.name} completed: ${result.totalDuration.inMilliseconds} ms, Size: ${result.fileSizeDisplay}');
     }

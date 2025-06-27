@@ -8,11 +8,14 @@ import 'package:path_provider/path_provider.dart';
 
 import 'runner.dart';
 
-class SharedPreferencesRunner implements BenchmarkRunner {
+class SharedPreferencesRunner extends BenchmarkRunner {
   const SharedPreferencesRunner();
 
   @override
   String get name => 'Shared Preferences';
+
+  @override
+  int? get maxOperations => 1000;   // SharedPreferences is very flow
 
   @override
   Future<BenchResult> run(String data, int operations) async {
