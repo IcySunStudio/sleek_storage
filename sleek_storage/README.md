@@ -75,6 +75,33 @@ final user = usersBox.get('user1');
 // Get all users
 final allUsers = usersBox.getAll();
 ```
+---
+
+## Batch Writes: Best Practices
+
+**Avoid:**  
+Do not use `await` inside a loop for writing multiple values, as this results in multiple separate file writes and poor performance.
+This is true for all write operations, including `set`, `put`, `clear`,  `delete`, ...
+
+```dart
+// ❌ Inefficient: using `await put()` in a loop:
+// Triggers a file write for every key
+for (...) {
+  await box.put(key, data);
+}
+
+// ✅ Efficient: using `putAll`:
+// Writes all values in a single operation using putAll
+await box.putAll({
+  for (...) key: data,
+});
+
+// ✅ Efficient: using `put` without `await`: 
+// Writes all values in memory, and wait next event loop to write them all at once
+for (...) {
+  box.put(key, data);
+}
+```
 
 ---
 
