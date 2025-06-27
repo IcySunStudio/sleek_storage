@@ -126,7 +126,7 @@ void main() async {
     });
     test('close releases resources', () async {
       var storage = await setUp();
-      storage.close();
+      await storage.close();
       expect(() => storage.lastSavedAt.add(DateTime.now()), throwsA(isA<StateError>()));
     });
     test('concurrent flush calls do not corrupt data', () async {

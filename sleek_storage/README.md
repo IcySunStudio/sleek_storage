@@ -105,6 +105,28 @@ for (...) {
 
 ---
 
+## Benchmark
+This table shows write times, reload times, read times, and file sizes at different operation scales.
+
+| Operations | Competitor | Write (ms) | Reload (ms) | Read (ms) | File Size (MB) |
+|------------|------------|------------|-------------|-----------|---------------|
+| 1,000      | Sleek Storage | 41        | 25          | 0         | 0.5 MB        |
+| 1,000      | Hive CE     | 17        | 17          | 0         | 0.4 MB        |
+| 1,000      | Shared Preferences | 9908      | 0           | 0         | 0.5 MB        |
+| 100,000    | Sleek Storage | 1747      | 1599        | 12        | 50.2 MB       |
+| 100,000    | Hive CE     | 485       | 377         | 88        | 43.4 MB       |
+
+**Bottom Line:** Sleek Storage delivers performance that is comparable to Hive for most use cases. Hive still leads in raw speed for large datasets. Shared Preferences, however, falls significantly behind in write performance.
+
+**Notes:**
+- Tested on June 2025, on Windows 11, with an AMD 3900X CPU and NVMe SSD drive.
+- Data used is an advanced JSON object with different types, including nested objects and lists.
+- Reload time is the time taken to read all data from disk into memory (usually done at app startup).
+- Uses batched writes when available.
+- Code is available in the benchmark folder.
+
+---
+
 ## Limitations
 
 - **Not designed for multi-thread/isolate use:** For simplicity and speed, Sleek Storage is optimized for main isolate usage only.
