@@ -1,0 +1,20 @@
+name: sleek_storage_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  sleek_storage:
+    path: ../sleek_storage
+  shared_preferences: ^2.5.3
+  hive_ce: ^2.11.3
+
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  csv: ^6.0.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  json_serializable: ^6.9.5
+  hive_ce_generator: any
