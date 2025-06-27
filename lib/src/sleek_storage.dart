@@ -105,28 +105,64 @@ class SleekStorage {
   List<String> getAllBoxesKeys() => _rawData[_boxesKey].keys.toList();
 
   /// Commit change to storage, and ask to save to disk.
-  void _save(String rootKey, String key, dynamic jsonValue) async {
+  void _save(String rootKey, String key, dynamic jsonValue) async {   // TODO return Future so that set/put can be awaited ?
     // Save changed value
     _rawData[rootKey][key] = jsonValue;
 
-    // Ask flush at the next event loop
-    if (!_flushScheduled) {
-      Future.delayed(Duration.zero, flush);
-      _flushScheduled = true;
-    }
+    // Ask flush
+    await flush();
   }
 
-  /// Whether a flush is scheduled at next event loop.
-  bool _flushScheduled = false;
+  /// Future that is running a flush operation (while flush is pending & file is being written to disk).
+  Future<void>? _runningFlushFuture;
 
   /// Write the current storage data to disk.
   /// This is automatically called when any data is modified, executed at the next current event loop.
-  /// Call this method to ensure all changes are saved immediately.
   /// Returns a [Future] that completes when the data is written.
+  /// If a flush is already pending, it will just wait for it to complete.
+  /// If file is being written, it will wait for it to complete, then flush it again.
+  ///
+  /// You should never need to call this method directly.
   Future<void> flush() async {
-    _flushScheduled = false;
-    await _saveToFile(_rawData, _file);
-    lastSavedAt.add(await _file.lastModified());
+    if (_runningFlushFuture == null) {
+      // If no flush is in progress, start a new one
+      try {
+        _runningFlushFuture = _doFlush();
+        await _runningFlushFuture;
+      } finally {
+        _runningFlushFuture = null;
+      }
+    } else {
+      // If a flush is already in progress, wait for it to complete
+      final shouldFlushAgain = _writeRunning;
+      await _runningFlushFuture;
+
+      // Then schedule another flush
+      if (shouldFlushAgain) {
+        await flush();
+      }
+    }
+  }
+
+  /// Whether file is currently being written.
+  bool _writeRunning = false;
+
+  /// Internal method that performs the actual flush operation.
+  Future<void> _doFlush() async {
+    // Wait next event loop, to ensure to encode latest data if multiple changes happened in the same event loop.
+    await Future.delayed(Duration.zero);
+
+    // Encode data to JSON string
+    final dataString = json.encode(_rawData);   // TODO handle errors
+
+    // Write to file
+    try {
+      _writeRunning = true;
+      await _writeToFile(dataString, _file);
+      lastSavedAt.add(await _file.lastModified(), skipIfClosed: true);
+    } finally {
+      _writeRunning = false;
+    }
   }
 
   /// Close the storage, releasing any resources.
@@ -156,12 +192,10 @@ class SleekStorage {
     return null;
   }
 
-  static Future<void> _saveToFile(JsonObject data, File file) async {   // TODO what happens if we call this while another write is in progress? Handle it.
-    final dataString = json.encode(data);   // TODO handle errors
-
+  static Future<void> _writeToFile(String data, File file) async {
     // Write to a temporary file first, then rename it to avoid data corruption
     final tempFile = File('${file.path}.tmp');
-    await tempFile.writeAsString(dataString, flush: true);
+    await tempFile.writeAsString(data, flush: true);
     await tempFile.rename(file.path);
   }
 }

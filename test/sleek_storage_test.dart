@@ -6,15 +6,6 @@ import 'package:test/test.dart';
 import 'package:sleek_storage/sleek_storage.dart';
 
 void main() async {
-  Future<SleekStorage> setUp({bool deleteFileFirst = true}) async {
-    final path = Directory.systemTemp.path;
-    if (deleteFileFirst) {
-      await SleekStorage.deleteStorage(path);
-    }
-    return await SleekStorage.getInstance(path);
-  }
-
-  // Tests
   group('Tests', () {
     // --- Basic tests ---
     const intValue = 42;
@@ -84,6 +75,8 @@ void main() async {
 
       // Wait for the value to be written to disk
       await storage.lastSavedAt.next;
+      // Ensure no additional saves were triggered
+      await Future.delayed(const Duration(seconds: 1));
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
@@ -116,6 +109,64 @@ void main() async {
 
       // Wait for the value to be written to disk
       await storage.lastSavedAt.next;
+    });
+    test('getAllValuesKeys and getAllBoxesKeys', () async {
+      var storage = await setUp();
+      storage.value<int>('val1').set(1);
+      storage.value<int>('val2').set(2);
+      storage.box<String>('box1').put('k', 'v');
+      await storage.lastSavedAt.next;
+
+      expect(storage.getAllValuesKeys(), containsAll(['val1', 'val2']));
+      expect(storage.getAllBoxesKeys(), contains('box1'));
+    });
+    test('close releases resources', () async {
+      var storage = await setUp();
+      storage.close();
+      expect(() => storage.lastSavedAt.add(DateTime.now()), throwsA(isA<StateError>()));
+    });
+    test('concurrent flush calls do not corrupt data', () async {
+      var storage = await setUp();
+      storage.value<int>('val').set(1);
+      // Call flush twice in quick succession
+      await Future.wait([storage.flush(), storage.flush()]);
+      var storage2 = await setUp(deleteFileFirst: false);
+      expect(storage2.value<int>('val').value, 1);
+    });
+    test('concurrent flush triggers correct number of writes', () async {
+      var storage = await setUp();
+      storage.value<int>('val').set(1);
+
+      var saveCount = 0;
+      storage.lastSavedAt.listen((_) => saveCount++);
+
+      // Start flushes at the same time
+      await Future.wait([
+        storage.flush(),
+        storage.flush(),
+        storage.flush(),
+        storage.flush(),
+      ]);
+
+      // Should have saved once
+      await Future.delayed(Duration.zero);    // Ensure lastSavedAt is updated (next event loop)
+      expect(saveCount, 1);
+
+      // Flush again just once
+      saveCount = 0;
+      await storage.flush();
+      await Future.delayed(Duration.zero);    // Ensure lastSavedAt is updated (next event loop)
+      expect(saveCount, 1);
+
+      // Start 3 consecutive flushes: should save only twice: one for the first, one for the queued flush
+      saveCount = 0;
+      await Future.wait([
+        storage.flush(),
+        Future.delayed(Duration.zero, storage.flush),
+        Future.delayed(Duration.zero, storage.flush),
+      ]);
+      await Future.delayed(Duration.zero);    // Ensure lastSavedAt is updated (next event loop)
+      expect(saveCount, 2);
     });
 
     // --- Advanced tests ---
@@ -179,6 +230,14 @@ void main() async {
       expect(iterableEquals(myList, readList), true);
     });
   });
+}
+
+Future<SleekStorage> setUp({bool deleteFileFirst = true}) async {
+  final path = Directory.systemTemp.path;
+  if (deleteFileFirst) {
+    await SleekStorage.deleteStorage(path);
+  }
+  return await SleekStorage.getInstance(path);
 }
 
 
