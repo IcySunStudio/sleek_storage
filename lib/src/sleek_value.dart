@@ -13,14 +13,14 @@ sealed class _SleekValueBase<T> {
   final SleekStorage _storage;
   final ToJson<T> _toJson;
 
-  void clear();
+  Future<void> clear();
 
   /// Release all associated resources.
   void close();
 
   dynamic _serialize();
 
-  void _save() => _storage._save(_rootKey, key, _serialize());
+  Future<void> _save() => _storage._save(_rootKey, key, _serialize());
 }
 
 /// A single value stored in the [SleekStorage].
@@ -51,15 +51,18 @@ class SleekValue<T> extends _SleekValueBase<T> {
   /// Set new [value].
   /// Set it to null to clear the value.
   /// [value] is serialized immediately, throwing if it fails.
-  void set(T? value) {
+  /// Future completes when the value is set and saved to disk.
+  Future<void> set(T? value) {
     _serializedValue = value != null ? _toJson(value) : null;
     _value = value;
     _stream?.add(value);
-    _save();
+    return _save();
   }
 
+  /// Clear the value.
+  /// Future completes when the box is cleared and saved to disk.
   @override
-  void clear() => set(null);
+  Future<void> clear() => set(null);
 
   @override
   void close() => _stream?.close();
@@ -118,31 +121,34 @@ class SleekBox<T> extends _SleekValueBase<T> {
   /// Saves the [value] at the [key] in the box.
   /// If the [key] already exists, it will be overwritten.
   /// [value] is serialized immediately, throwing if it fails.
-  void put(String key, T value) {
+  /// Future completes when the value is set and data saved to disk.
+  Future<void> put(String key, T value) {
     _serializedData[key] = _toJson(value);
     _data[key] = value;
     _streams[key]?.add(value);
     _updateStream();
-    _save();
+    return _save();
   }
 
   /// Delete the value at the given [key] in the box.
-  void delete(String key) {
+  /// Future completes when the box is deleted from disk.
+  Future<void> delete(String key) {
     _serializedData.remove(key);
     _data.remove(key);
     _closeStream(key);
     _updateStream();
-    _save();
+    return _save();
   }
 
   /// Clear all values in the box.
+  /// Future completes when the box is cleared and saved to disk.
   @override
-  void clear() {
+  Future<void> clear() {
     _serializedData.clear();
     _data.clear();
     _closeAllStreams();
     _updateStream();
-    _save();
+    return _save();
   }
 
   @override

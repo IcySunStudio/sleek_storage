@@ -105,12 +105,12 @@ class SleekStorage {
   List<String> getAllBoxesKeys() => _rawData[_boxesKey].keys.toList();
 
   /// Commit change to storage, and ask to save to disk.
-  void _save(String rootKey, String key, dynamic jsonValue) async {   // TODO return Future so that set/put can be awaited ?
+  Future<void> _save(String rootKey, String key, dynamic jsonValue) {
     // Save changed value
     _rawData[rootKey][key] = jsonValue;
 
     // Ask flush
-    await flush();
+    return flush();
   }
 
   /// Future that is running a flush operation (while flush is pending & file is being written to disk).

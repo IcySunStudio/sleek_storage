@@ -9,29 +9,6 @@ void main() async {
   group('Tests', () {
     // --- Basic tests ---
     const intValue = 42;
-    test('Box', () async {
-      // Create a SleekStorage instance
-      var storage = await setUp();
-
-      // Open box
-      const name = 'testBox';
-      var box = storage.box<int>(name);
-      expect(box.key, name);
-
-      // Add value
-      box.put('key1', intValue);
-      var value = box.get('key1');
-      expect(value, intValue);
-
-      // Wait for the value to be written to disk
-      await storage.lastSavedAt.next;
-
-      // Check if the value is saved correctly
-      storage = await setUp(deleteFileFirst: false);
-      box = storage.box<int>(name);
-      value = box.get('key1');
-      expect(value, intValue);
-    });
     test('Value', () async {
       // Create a SleekStorage instance
       var storage = await setUp();
@@ -42,17 +19,44 @@ void main() async {
       expect(holder.key, name);
 
       // Set value
-      holder.set(intValue);
+      final future = holder.set(intValue);
+
+      // Ensure the value is set immediately
       var value = holder.value;
       expect(value, intValue);
 
       // Wait for the value to be written to disk
-      await storage.lastSavedAt.next;
+      await future;
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
       holder = storage.value<int>(name);
       value = holder.value;
+      expect(value, intValue);
+    });
+    test('Box', () async {
+      // Create a SleekStorage instance
+      var storage = await setUp();
+
+      // Open box
+      const name = 'testBox';
+      var box = storage.box<int>(name);
+      expect(box.key, name);
+
+      // Add value
+      final future = box.put('key1', intValue);
+
+      // Ensure the value is set immediately
+      var value = box.get('key1');
+      expect(value, intValue);
+
+      // Wait for the value to be written to disk
+      await future;
+
+      // Check if the value is saved correctly
+      storage = await setUp(deleteFileFirst: false);
+      box = storage.box<int>(name);
+      value = box.get('key1');
       expect(value, intValue);
     });
     test('Multiple grouped modifications', () async {
@@ -73,7 +77,7 @@ void main() async {
       box.put('key2', intValue);
       box.put('key3', intValue);
 
-      // Wait for the value to be written to disk
+      // Wait for values to be written to disk
       await storage.lastSavedAt.next;
       // Ensure no additional saves were triggered
       await Future.delayed(const Duration(seconds: 1));
@@ -107,7 +111,7 @@ void main() async {
       box.put('key1', 50);
       box.put('key1', 51);
 
-      // Wait for the value to be written to disk
+      // Wait for the value to be written to disk (avoid consecutive tests issues)
       await storage.lastSavedAt.next;
     });
     test('getAllValuesKeys and getAllBoxesKeys', () async {
@@ -180,12 +184,14 @@ void main() async {
 
       // Add value
       final myObject = MyClass.random(1);
-      box.put('key1', myObject);
+      final future = box.put('key1', myObject);
+
+      // Ensure the value is set immediately
       var value = box.get('key1');
       expect(value, myObject);
 
       // Wait for the value to be written to disk
-      await storage.lastSavedAt.next;
+      await future;
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
