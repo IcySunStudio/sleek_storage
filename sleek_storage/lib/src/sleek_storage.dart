@@ -43,11 +43,10 @@ class SleekStorage {
   final DataStream<DateTime?> lastSavedAt;
 
   /// Loads and parses the storage from disk, inside the directory at [directoryPath].
-  /// You can optionally specify a [storageName] to use a different file name.
-  /// Returns a [SleekStorage] instance.
+  /// You can optionally specify a [storageName] to use a custom file name.
+  /// Returns a new [SleekStorage] instance.
   ///
-  /// Because this is reading from disk, it shouldn't be awaited in
-  /// performance-sensitive blocks.
+  /// Because this is reading from disk, it shouldn't be awaited in performance-sensitive blocks.
   static Future<SleekStorage> getInstance(String directoryPath, {String? storageName}) async {
     // Get file instance
     final file = _getStorageFile(directoryPath, storageName);
