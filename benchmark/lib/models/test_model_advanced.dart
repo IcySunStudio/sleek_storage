@@ -1,8 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'test_model_advanced.g.dart';
-
-@JsonSerializable()
 class TestModelAdvanced {
   const TestModelAdvanced({
     required this.string,
@@ -13,7 +8,17 @@ class TestModelAdvanced {
     required this.list,
     required this.nested,
   });
-  factory TestModelAdvanced.fromJson(Map<String, dynamic> json) => _$TestModelAdvancedFromJson(json);
+  factory TestModelAdvanced.fromJson(Map<String, dynamic> json) => TestModelAdvanced(
+    string: json['string'] as String,
+    number: json['number'] as int,
+    doubleValue: (json['double'] as num).toDouble(),
+    boolean: json['boolean'] as bool,
+    nullValue: json['nullValue'],
+    list: (json['list'] as List)
+        .map((e) => ListItem.fromJson(e))
+        .toList(),
+    nested: Nested.fromJson(json['nested'] as Map<String, dynamic>),
+  );
 
   static TestModelAdvanced random(int index) => TestModelAdvanced(
     string: 'hello$index',
@@ -40,60 +45,76 @@ class TestModelAdvanced {
   final List<ListItem> list;
   final Nested nested;
 
-  Map<String, dynamic> toJson() => _$TestModelAdvancedToJson(this);
+  Map<String, dynamic> toJson() => {
+    'string': string,
+    'number': number,
+    'double': doubleValue,
+    'boolean': boolean,
+    'nullValue': nullValue,
+    'list': list.map((e) => e.toJson()).toList(),
+    'nested': nested.toJson(),
+  };
 }
 
-@JsonSerializable()
 class ListItem {
   const ListItem({
     required this.value,
   });
-  factory ListItem.fromJson(Map<String, dynamic> json) => _$ListItemFromJson(json);
+  factory ListItem.fromJson(Map<String, dynamic> json) => ListItem(
+    value: json['value'] as String,
+  );
 
   final String value;
 
-  Map<String, dynamic> toJson() => _$ListItemToJson(this);
+  Map<String, dynamic> toJson() => {
+    'value': value,
+  };
 }
 
-@JsonSerializable()
 class NestedMap {
   const NestedMap({required this.nestedMap});
-  factory NestedMap.fromJson(Map<String, dynamic> json) => _$NestedMapFromJson(json);
+  factory NestedMap.fromJson(Map<String, dynamic> json) => NestedMap(nestedMap: json['nestedMap'] as String);
 
   final String nestedMap;
 
-  Map<String, dynamic> toJson() => _$NestedMapToJson(this);
+  Map<String, dynamic> toJson() => {'nestedMap': nestedMap};
 }
 
-@JsonSerializable()
 class Nested {
   const Nested({
     required this.innerString,
     required this.innerList,
     required this.innerMap,
   });
-  factory Nested.fromJson(Map<String, dynamic> json) => _$NestedFromJson(json);
+  factory Nested.fromJson(Map<String, dynamic> json) => Nested(
+    innerString: json['innerString'] as String,
+    innerList: (json['innerList'] as List).map((e) => e as int).toList(),
+    innerMap: InnerMap.fromJson(json['innerMap'] as Map<String, dynamic>),
+  );
 
   final String innerString;
   final List<int> innerList;
   final InnerMap innerMap;
 
-  Map<String, dynamic> toJson() => _$NestedToJson(this);
+  Map<String, dynamic> toJson() => {
+    'innerString': innerString,
+    'innerList': innerList,
+    'innerMap': innerMap.toJson(),
+  };
 }
 
-@JsonSerializable()
 class InnerMap {
   const InnerMap({required this.flag, this.value});
-  factory InnerMap.fromJson(Map<String, dynamic> json) => _$InnerMapFromJson(json);
+  factory InnerMap.fromJson(Map<String, dynamic> json) => InnerMap(
+    flag: json['flag'] as bool,
+    value: json['value'],
+  );
 
   final bool flag;
   final dynamic value;
 
-  Map<String, dynamic> toJson() => _$InnerMapToJson(this);
-}
-
-class TestModelAdvancedHiveAdapter {
-  const TestModelAdvancedHiveAdapter(this.encodedValue);
-
-  final String encodedValue;
+  Map<String, dynamic> toJson() => {
+    'flag': flag,
+    'value': value,
+  };
 }
