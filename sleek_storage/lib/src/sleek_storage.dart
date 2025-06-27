@@ -9,7 +9,7 @@ part 'sleek_value.dart';
 typedef JsonObject = Map<String, dynamic>;
 typedef JsonList = Iterable<dynamic>;
 
-typedef FromJson<T> = T Function(dynamic json);
+typedef FromJson<T> = T Function(String key, dynamic json);
 typedef ToJson<T> = dynamic Function(T object);
 
 /// Storage system that allows you to store values and boxes in a JSON file.
@@ -173,6 +173,8 @@ class SleekStorage {
   }
 
   /// Delete the storage file from disk.
+  /// But all data is still in memory.
+  /// So you should call this method before creating a new storage instance.
   static Future<void> deleteStorage(String directoryPath, {String? storageName}) async {
     final file = getStorageFile(directoryPath, storageName);
     if (await file.exists()) {

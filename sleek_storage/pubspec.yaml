@@ -1,6 +1,6 @@
 name: sleek_storage
 description: Simple, reactive and lightweight key-value store that saves data in a JSON file
-version: 1.0.0
+version: 1.1.0
 repository: https://github.com/IcySunStudio/sleek_storage
 issue_tracker: https://github.com/IcySunStudio/sleek_storage/issues
 

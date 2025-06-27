@@ -1,10 +1,11 @@
 part of 'sleek_storage.dart';
 
-T _identity<T>(dynamic object) => object as T;
+T _defaultFromJson<T>(String key, dynamic json) => json as T;
+dynamic _defaultToJson<T>(T object) => object;
 
 sealed class _SleekValueBase<T> {
   _SleekValueBase(this.key, this._storage, ToJson<T>? toJson):
-      _toJson = toJson ?? _identity;
+      _toJson = toJson ?? _defaultToJson;
 
   String get _rootKey;
 
@@ -26,7 +27,7 @@ sealed class _SleekValueBase<T> {
 /// A single value stored in the [SleekStorage].
 class SleekValue<T> extends _SleekValueBase<T> {
   SleekValue._internal(super.key, super._storage, this._serializedValue, FromJson<T>? fromJson, super.toJson):
-      _value = _serializedValue != null ? (fromJson ?? _identity)(_serializedValue) : null;
+      _value = _serializedValue != null ? (fromJson ?? _defaultFromJson)(key, _serializedValue) : null;
 
   @override
   String get _rootKey => SleekStorage._valuesKey;
@@ -77,7 +78,7 @@ class SleekBox<T> extends _SleekValueBase<T> {
       _serializedData = data ?? {},
       _data = {
         for (final MapEntry(:key, :value) in (data ?? const {}).entries)
-          key: (fromJson ?? _identity)(value),
+          key: (fromJson ?? _defaultFromJson)(key, value),
       };
 
   @override

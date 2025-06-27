@@ -180,7 +180,7 @@ void main() async {
 
       // Open box
       const name = 'objectBox';
-      var box = storage.box<MyClass>(name, fromJson: (json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
+      var box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
 
       // Add value
       final myObject = MyClass.random(1);
@@ -195,7 +195,7 @@ void main() async {
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
-      box = storage.box<MyClass>(name, fromJson: (json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
+      box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
       value = box.get('key1');
       expect(value, myObject);
     });
@@ -205,7 +205,7 @@ void main() async {
 
       // Open box
       const name = 'objectBox';
-      var box = storage.box<MyClass>(name, fromJson: (json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
+      var box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
 
       // Add value
       const length = 10000;
@@ -226,7 +226,7 @@ void main() async {
       print('Time taken to load storage: ${stopwatch.elapsedMilliseconds} ms');
 
       stopwatch = Stopwatch()..start();
-      box = storage.box<MyClass>(name, fromJson: (json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
+      box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
       print('Time taken to open box: ${stopwatch.elapsedMilliseconds} ms');
 
       final readList = <MyClass>[];
