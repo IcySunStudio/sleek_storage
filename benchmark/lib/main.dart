@@ -1,8 +1,18 @@
 import 'dart:io';
+import 'package:flutter/widgets.dart';
 
 import 'package:csv/csv.dart';
 import 'package:sleek_storage_benchmark/bench_result.dart';
 import 'package:sleek_storage_benchmark/runners/shared_preferences.dart';
+
+void main() async {
+  // This ensures Flutter is initialized and dart:ui is available
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Run benchmarks
+  await _runBenchmarks();
+}
+
 
 const benchmarks = [
   100,
@@ -16,9 +26,9 @@ const competitors = [
   SharedPreferencesRunner(),
 ];
 
-void main() async {
+Future<void> _runBenchmarks() async {
   for (final operations in benchmarks) {
-    print('Running benchmarks for $operations operations...');
+    print('--- Running benchmarks for $operations operations ---');
     final results = <String, BenchResult>{};
 
     // Run all benchmarks
@@ -38,15 +48,3 @@ void main() async {
     File('benchmark_#$operations.csv').writeAsStringSync(csv);
   }
 }
-
-/*
-// Format a duration to "00.00 s"
-String formatTime(Duration duration) {
-  final seconds = duration.inMilliseconds / 1000;
-  return '${seconds.toStringAsFixed(2)} s';
-}
-
-String formatSize(double size) {
-  return '${size.toStringAsFixed(2)} MB';
-}
-*/
