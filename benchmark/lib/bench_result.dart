@@ -12,5 +12,6 @@ class BenchResult {
   final int fileSizeInBytes;
 
   Duration get totalDuration => writeDuration + reloadDuration + readDuration;
-  int get fileSizeInMB => (fileSizeInBytes / (1024 * 1024)).round();
+  double get fileSizeInMB => fileSizeInBytes / (1024 * 1024);
+  String get fileSizeDisplay => '${fileSizeInMB.toStringAsFixed(1)} MB';
 }

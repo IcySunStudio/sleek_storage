@@ -49,7 +49,7 @@ class SleekStorage {
   /// Because this is reading from disk, it shouldn't be awaited in performance-sensitive blocks.
   static Future<SleekStorage> getInstance(String directoryPath, {String? storageName}) async {
     // Get file instance
-    final file = _getStorageFile(directoryPath, storageName);
+    final file = getStorageFile(directoryPath, storageName);
 
     // Load the file
     final data = await _readFromFileSafe(file) ?? {
@@ -65,7 +65,8 @@ class SleekStorage {
     return SleekStorage._internal(file, data, lastSavedAt);
   }
 
-  static File _getStorageFile(String directoryPath, [String? storageName]) => File(path.join(directoryPath, '${storageName ?? 'sleek'}.json'));
+  /// Get the storage file, given a [directoryPath] and an optional [storageName].
+  static File getStorageFile(String directoryPath, [String? storageName]) => File(path.join(directoryPath, '${storageName ?? 'sleek'}.json'));
 
   /// Get or create a box named [boxName].
   /// All items of the box must be of the same type [T].
@@ -165,13 +166,15 @@ class SleekStorage {
   }
 
   /// Close the storage, releasing any resources.
-  void close() {
+  /// Future completes when storage is fully written to disk and closed.
+  Future<void> close() async {
+    await _runningFlushFuture;
     lastSavedAt.close();
   }
 
   /// Delete the storage file from disk.
   static Future<void> deleteStorage(String directoryPath, {String? storageName}) async {
-    final file = _getStorageFile(directoryPath, storageName);
+    final file = getStorageFile(directoryPath, storageName);
     if (await file.exists()) {
       await file.delete();
     }
