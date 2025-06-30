@@ -104,6 +104,9 @@ class SleekBox<T> extends _SleekValueBase<T> {
   /// List all keys in the box.
   List<String> get keys => _data.keys.toList();
 
+  /// Whether this box contains the given [key].
+  bool containsKey(String? key) => _data.containsKey(key);
+
   /// Returns the value associated with the given [key].
   /// Or if the key does not exist:
   /// - [defaultValue] if specified,
