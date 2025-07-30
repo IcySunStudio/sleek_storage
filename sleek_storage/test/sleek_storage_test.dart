@@ -86,6 +86,36 @@ void main() async {
       expect(box.get('key2'), intValue);
       expect(box.get('key3'), intValue);
     });
+    test('Box.delete', () async {
+      // Create a SleekStorage instance
+      var storage = await setUp();
+
+      // Open box
+      const name = 'testBox';
+      var box = storage.box<int>(name);
+      expect(box.key, name);
+
+      // Add value
+      const key = 'key1';
+      box.put(key, intValue);
+
+      // Ensure the value is set immediately
+      expect(box.get(key), intValue);
+
+      // Listen to changes
+      expectLater(box.watch(key).innerStream, emitsInOrder([null]));
+
+      // Delete value
+      final future = box.delete(key);
+
+      // Wait for the value to be deleted from disk
+      await future;
+
+      // Check if the value is deleted correctly
+      storage = await setUp(deleteFileFirst: false);
+      box = storage.box<int>(name);
+      expect(box.get(key), isNull);
+    });
     test('Multiple grouped modifications', () async {
       // Create a SleekStorage instance
       var storage = await setUp();

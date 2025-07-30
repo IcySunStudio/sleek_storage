@@ -117,6 +117,7 @@ class SleekBox<T> extends _SleekValueBase<T> {
   List<T> getAll() => _data.values.toList();
 
   /// Returns a [DataStream] that emits the value associated with the given [key] when it changes.
+  /// If the key does not exist, or when value is deleted, it will emit `null`.
   DataStream<T?> watch(String key) => _streams.putIfAbsent(key,() => DataStream(get(key)));
 
   /// Returns a [DataStream] that emits all values in the box when any changes.
@@ -154,7 +155,7 @@ class SleekBox<T> extends _SleekValueBase<T> {
   Future<void> delete(String key) {
     _serializedData.remove(key);
     _data.remove(key);
-    _closeStream(key);
+    _streams[key]?.add(null);
     _updateStream();
     return _save();
   }
@@ -165,7 +166,7 @@ class SleekBox<T> extends _SleekValueBase<T> {
   Future<void> clear() {
     _serializedData.clear();
     _data.clear();
-    _closeAllStreams();
+    _streams.forEach((k, v) => v.add(null));
     _updateStream();
     return _save();
   }
@@ -177,8 +178,6 @@ class SleekBox<T> extends _SleekValueBase<T> {
   }
 
   void _updateStream() => _stream?.add(getAll());
-
-  void _closeStream(String key) => _streams.remove(key)?.close();
 
   void _closeAllStreams() {
     for (final stream in _streams.values) {
