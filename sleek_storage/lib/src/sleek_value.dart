@@ -138,11 +138,11 @@ class SleekBox<T> extends _SleekValueBase<T> {
   /// If the [key] already exists, it will be overwritten.
   /// [value] is serialized immediately, throwing if it fails.
   /// Future completes when values are set and data saved to disk.
-  /// You'll have similar performance as multiple calls to [put] if not awaited.
+  /// You'll have similar performance as multiple calls to [put] when NOT awaited.
   Future<void> putAll(Map<String, T> entries) {
     for (final MapEntry(:key, :value) in entries.entries) {
       _serializedData[key] = _toJson(value);
-      _streams[key]?.add(value);
+      _data[key] = value;
       _streams[key]?.add(value);
     }
     _updateStream();

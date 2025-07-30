@@ -59,6 +59,33 @@ void main() async {
       value = box.get('key1');
       expect(value, intValue);
     });
+    test('Box.putAll' , () async {
+      // Create a SleekStorage instance
+      var storage = await setUp();
+
+      // Open box
+      const name = 'testBox';
+      var box = storage.box<int>(name);
+      expect(box.key, name);
+
+      // Add values
+      final future = box.putAll({'key1': intValue, 'key2': intValue, 'key3': intValue});
+
+      // Ensure the values are set immediately
+      expect(box.get('key1'), intValue);
+      expect(box.get('key2'), intValue);
+      expect(box.get('key3'), intValue);
+
+      // Wait for the values to be written to disk
+      await future;
+
+      // Check if the values are saved correctly
+      storage = await setUp(deleteFileFirst: false);
+      box = storage.box<int>(name);
+      expect(box.get('key1'), intValue);
+      expect(box.get('key2'), intValue);
+      expect(box.get('key3'), intValue);
+    });
     test('Multiple grouped modifications', () async {
       // Create a SleekStorage instance
       var storage = await setUp();
