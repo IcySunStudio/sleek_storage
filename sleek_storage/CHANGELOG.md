@@ -2,6 +2,7 @@
 * BREAKING: `Box.watch` now emits `null` when value is deleted or when box is cleared.
 * BREAKING: `fromJson` now also provides the key.
 * New `Box.containsKey` method.
+* New optional `defaultValue` parameter on `SleekStorage.value()` method.
 * Fix `Box.putAll` method.
 
 ## 1.0.0

@@ -85,12 +85,15 @@ class SleekStorage {
   }
 
   /// Get or create a [SleekValue] for the given [key].
-  SleekValue<T> value<T>(String key, {FromJson<T>? fromJson, ToJson<T>? toJson}) {
+  /// [defaultValue] can be provided to be used as value if it does not exist in storage yet (it's actually not saved to disk).
+  /// If [fromJson] and [toJson] are omitted, [T] must be a primitive, JSON-compatible type.
+  SleekValue<T> value<T>(String key, {T? defaultValue, FromJson<T>? fromJson, ToJson<T>? toJson}) {
     return _values.putIfAbsent(
       key,
       () => SleekValue<T>._internal(
         key,
         this,
+        defaultValue,
         _rawData[_valuesKey][key],
         fromJson,
         toJson,

@@ -17,6 +17,7 @@ void main() async {
       const name = 'myInt';
       var holder = storage.value<int>(name);
       expect(holder.key, name);
+      expect(holder.value, isNull);
 
       // Set value
       final future = holder.set(intValue);
@@ -33,6 +34,16 @@ void main() async {
       holder = storage.value<int>(name);
       value = holder.value;
       expect(value, intValue);
+    });
+    test('Value with defaultValue', () async {
+      // Create a SleekStorage instance
+      var storage = await setUp();
+
+      // Create value holder
+      const name = 'myInt';
+      var holder = storage.value<int>(name, defaultValue: intValue);
+      expect(holder.key, name);
+      expect(holder.value, intValue);
     });
     test('Box', () async {
       // Create a SleekStorage instance

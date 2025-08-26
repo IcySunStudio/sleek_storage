@@ -26,8 +26,8 @@ sealed class _SleekValueBase<T> {
 
 /// A single value stored in the [SleekStorage].
 class SleekValue<T> extends _SleekValueBase<T> {
-  SleekValue._internal(super.key, super._storage, this._serializedValue, FromJson<T>? fromJson, super.toJson):
-      _value = _serializedValue != null ? (fromJson ?? _defaultFromJson)(key, _serializedValue) : null;
+  SleekValue._internal(super.key, super._storage, T? defaultValue, this._serializedValue, FromJson<T>? fromJson, super.toJson):
+      _value = (_serializedValue != null ? (fromJson ?? _defaultFromJson)(key, _serializedValue) : null) ?? defaultValue;
 
   @override
   String get _rootKey => SleekStorage._valuesKey;
