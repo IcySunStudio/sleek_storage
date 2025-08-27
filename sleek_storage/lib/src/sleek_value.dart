@@ -120,6 +120,9 @@ class SleekBox<T> extends _SleekValueBase<T> with Iterable<T> {
   /// - Otherwise `null` is returned
   T? get(String key, {T? defaultValue}) => _data[key] ?? defaultValue;
 
+  /// Same as [get]
+  T? operator [](String key) => get(key);
+
   /// Returns all values in the box.
   /// Return a new `List` with all values.
   /// If you need to iterate on box on a async loop, you better iterate on the box directly, to ensure you get latest value (lazy iteration).
@@ -146,6 +149,9 @@ class SleekBox<T> extends _SleekValueBase<T> with Iterable<T> {
     _updateStream();
     return _save();
   }
+
+  /// Same as [put]
+  void operator []=(String key, T value) => put(key, value);
 
   /// Saves all the key-value pairs in the [entries] map.
   /// If the [key] already exists, it will be overwritten.

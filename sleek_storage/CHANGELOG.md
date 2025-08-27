@@ -2,6 +2,7 @@
 * BREAKING: `Box.watch` now emits `null` when value is deleted or when box is cleared.
 * BREAKING: `fromJson` now also provides the key.
 * New: `SleekBox` is now a lazy `Iterable`.
+* New: `SleekBox` now has index operators.
 * New `Box.containsKey` method.
 * New optional `defaultValue` parameter on `SleekStorage.value()` method.
 * Fix `Box.putAll` method.

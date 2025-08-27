@@ -70,6 +70,25 @@ void main() async {
       value = box.get('key1');
       expect(value, intValue);
     });
+    test('Box index operator', () async {
+      // Create a SleekStorage instance
+      var storage = await setUp();
+
+      // Open box
+      const name = 'testBox';
+      var box = storage.box<int>(name);
+      expect(box.key, name);
+
+      // Add value
+      box['key1'] = intValue;
+
+      // Ensure the value is set immediately
+      var value = box['key1'];
+      expect(value, intValue);
+
+      // Wait for values to be written to disk
+      await storage.lastSavedAt.next;
+    });
     test('Box.putAll' , () async {
       // Create a SleekStorage instance
       var storage = await setUp();
