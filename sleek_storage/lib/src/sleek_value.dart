@@ -73,7 +73,13 @@ class SleekValue<T> extends _SleekValueBase<T> {
 }
 
 /// A collection of key-value pairs stored in the [SleekStorage].
-class SleekBox<T> extends _SleekValueBase<T> {
+///
+/// You can iterate on the box directly to get all values (lazy iterator).
+/// Modifying the map while iterating the values may break the iteration:
+/// - Modifying existing items should be fine.
+/// - Adding or removing items may throw a ConcurrentModificationError.
+/// If you need the latter, you should iterate on [keys] instead, and get each nullable-value by key.
+class SleekBox<T> extends _SleekValueBase<T> with Iterable<T> {
   SleekBox._internal(super.key, super._storage, JsonObject? data, FromJson<T>? fromJson, super.toJson):
       _serializedData = data ?? {},
       _data = {
@@ -99,6 +105,7 @@ class SleekBox<T> extends _SleekValueBase<T> {
   final Map<String, DataStream<T?>> _streams = {};
 
   /// Get the number of items in the box.
+  @override
   int get length => _data.length;
 
   /// List all keys in the box.
@@ -114,7 +121,12 @@ class SleekBox<T> extends _SleekValueBase<T> {
   T? get(String key, {T? defaultValue}) => _data[key] ?? defaultValue;
 
   /// Returns all values in the box.
+  /// Return a new `List` with all values.
+  /// If you need to iterate on box on a async loop, you better iterate on the box directly, to ensure you get latest value (lazy iteration).
   List<T> getAll() => _data.values.toList();
+
+  @override
+  Iterator<T> get iterator => _data.values.iterator;
 
   /// Returns a [DataStream] that emits the value associated with the given [key] when it changes.
   /// If the key does not exist, or when value is deleted, it will emit `null`.

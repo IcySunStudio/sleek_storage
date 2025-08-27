@@ -160,6 +160,40 @@ void main() async {
       // Ensure that only one save was triggered
       expect(saveCount, 1);
     });
+    test('Box enumeration reflects live changes', () async {
+      // Create a SleekStorage instance
+      var storage = await setUp();
+
+      // Open box
+      const name = 'testBox';
+      final box = storage.box<BasicClass>(name, fromJson: (key, json) => BasicClass.fromJson(json), toJson: (obj) => obj.toJson());
+
+      // Populate box with basic objects with same internal value
+      for (var i = 0; i < 10; i++) {
+        final obj = BasicClass('$i', intValue);
+        box.put(obj.id, obj);
+      }
+      expect(box.get('5')?.value, intValue);
+
+      // Enumerate
+      const newIntValue = 51;
+      for (final obj in box) {
+        // Simulate some processing
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Change one value AHEAD of iteration
+        if (obj.id == '1') {
+          final newObj = BasicClass('5', newIntValue);
+          box.put(newObj.id, newObj);
+        }
+
+        // Once iteration reaches the changed object, check if it's changed
+        else if (obj.id == '5') {
+          // Check if the value is changed correctly
+          expect(obj.value, newIntValue);
+        }
+      }
+    });
     test('Box.watch', () async {
       // Create a SleekStorage instance
       var storage = await setUp();
@@ -314,6 +348,22 @@ Future<SleekStorage> setUp({bool deleteFileFirst = true}) async {
   return await SleekStorage.getInstance(path);
 }
 
+
+class BasicClass {
+  const BasicClass(this.id, this.value);
+  factory BasicClass.fromJson(Map<String, dynamic> json) => BasicClass(
+    json['id'] as String,
+    json['value'] as int,
+  );
+
+  final String id;
+  final int value;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'value': value,
+  };
+}
 
 class MyClass {
   const MyClass({
