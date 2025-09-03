@@ -7,7 +7,7 @@
 
 **Fast. Simple. Reactive.**
 
-A simple, reactive, and lightweight key-value store written in pure Dart. Features instant, synchronous reads, atomic file writes, and fully type-safe collections, all embracing the serialization you already use in your app—no new formats, no codegen, no headaches.
+A simple, reactive, and lightweight key-value store written in pure Dart. Features instant, synchronous reads, atomic file writes, and fully type-safe collections, all embracing the JSON serialization you already use in your app—no new formats, no codegen, no headaches.
 
 ---
 
@@ -26,9 +26,9 @@ A simple, reactive, and lightweight key-value store written in pure Dart. Featur
   Loads all data in memory at startup for blazing-fast access. Great for small to medium datasets (see benchmarks).
 
 - **Atomic, Batched Writes:**  
-  Writes are grouped and performed atomically to avoid corruption, ensuring safety even where other systems aren’t.
+  Writes are grouped and performed atomically to avoid file corruption.
 
-- **Lightweight & Dependency-free:**  
+- **Lightweight:**  
   Pure Dart, minimal dependencies, and simple, auditable code. Works on all Flutter platforms (except Web, available soon).
 
 - **Safe Initialization Options:**  
@@ -152,7 +152,7 @@ A thorough study was conducted in June 2025, comparing over 20 Dart and Flutter 
 - **[get_storage](https://pub.dev/packages/get_storage):** Simple and synchronous, with callbacks for reactivity (no Streams). However, it depends on `GetX`, and it is old and looks abandoned.
 
 **Summary:**  
-Sleek Storage is JSON-first, type-safe, reactive, atomic, synchronous, lightweight, and dependency-free—combining the strengths of the best existing packages, while addressing their shortcomings.
+Sleek Storage is JSON-first, type-safe, reactive, atomic, synchronous and lightweight package, with minimal dependencies—combining the strengths of the best existing packages, while addressing their shortcomings.
 
 ---
 🏆 **Sleek Storage is the missing piece for easy local storage in Dart !**
