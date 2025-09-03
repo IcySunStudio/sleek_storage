@@ -116,7 +116,7 @@ void main() async {
       expect(box.get('key2'), intValue);
       expect(box.get('key3'), intValue);
     });
-    test('Box.delete', () async {
+    test('Box.delete(key)', () async {
       // Create a SleekStorage instance
       var storage = await setUp();
 
@@ -244,6 +244,43 @@ void main() async {
 
       expect(storage.getAllValuesKeys(), containsAll(['val1', 'val2']));
       expect(storage.getAllBoxesKeys(), contains('box1'));
+    });
+    test('clear storage', () async {
+      // Create a SleekStorage instance
+      var storage = await setUp();
+
+      // Add some data
+      storage.value<int>('val1').set(1);
+      storage.box<String>('box1').put('k', 'v');
+
+      // Wait for the value to be written to disk
+      await storage.lastSavedAt.next;
+
+      // Ensure data is present in memory
+      expect(storage.getAllValuesKeys(), contains('val1'));
+      expect(storage.getAllBoxesKeys(), contains('box1'));
+
+      // Clear storage
+      await storage.clear();
+
+      // Ensure data is cleared in memory
+      for (final key in storage.getAllValuesKeys()) {
+        expect(storage.value(key).value, isNull);
+      }
+      for (final key in storage.getAllBoxesKeys()) {
+        expect(storage.box(key).isEmpty, true);
+      }
+
+      // Reload storage from disk
+      storage = await setUp(deleteFileFirst: false);
+
+      // Ensure data is cleared on disk
+      for (final key in storage.getAllValuesKeys()) {
+        expect(storage.value(key).value, isNull);
+      }
+      for (final key in storage.getAllBoxesKeys()) {
+        expect(storage.box(key).isEmpty, true);
+      }
     });
     test('close releases resources', () async {
       var storage = await setUp();

@@ -168,6 +168,24 @@ class SleekStorage {
     }
   }
 
+  /// Clear all values and boxes in the storage.
+  /// Doesn't delete them, just clear their content, individually.
+  /// Watched values and boxes will emit `null` or be emptied.
+  Future<void> clear() {
+    // Clear all values
+    for (final value in _values.values) {
+      value.clear();
+    }
+
+    // Clear all boxes
+    for (final box in _boxes.values) {
+      box.clear();
+    }
+
+    // Wait for changes to be saved
+    return flush();
+  }
+
   /// Close the storage, releasing any resources.
   /// Future completes when storage is fully written to disk and closed.
   Future<void> close() async {
@@ -176,8 +194,7 @@ class SleekStorage {
   }
 
   /// Delete the storage file from disk.
-  /// But all data is still in memory.
-  /// So you should call this method before creating a new storage instance.
+  /// /!\ All data is still in memory: you should call this method before creating a new storage instance.
   static Future<void> deleteStorage(String directoryPath, {String? storageName}) async {
     final file = getStorageFile(directoryPath, storageName);
     if (await file.exists()) {
