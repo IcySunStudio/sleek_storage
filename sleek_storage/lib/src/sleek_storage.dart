@@ -69,22 +69,6 @@ class SleekStorage {
   /// Get the storage file, given a [directoryPath] and an optional [storageName].
   static File getStorageFile(String directoryPath, [String? storageName]) => File(path.join(directoryPath, '${storageName ?? 'sleek'}.json'));
 
-  /// Get or create a box named [boxName].
-  /// All items of the box must be of the same type [T].
-  /// If [fromJson] and [toJson] are omitted, [T] must be a primitive, JSON-compatible type.
-  SleekBox<T> box<T>(String boxName, {FromJson<T>? fromJson, ToJson<T>? toJson}) {
-    return _boxes.putIfAbsent(
-      boxName,
-      () => SleekBox<T>._internal(
-        boxName,
-        this,
-        _rawData[_boxesKey][boxName],
-        fromJson,
-        toJson,
-      ),
-    ) as SleekBox<T>;
-  }
-
   /// Get or create a [SleekValue] for the given [key].
   /// [defaultValue] can be provided to be used as value if it does not exist in storage yet (it's actually not saved to disk).
   /// If [fromJson] and [toJson] are omitted, [T] must be a primitive, JSON-compatible type.
@@ -100,6 +84,22 @@ class SleekStorage {
         toJson,
       ),
     ) as SleekValue<T>;
+  }
+
+  /// Get or create a box named [boxName].
+  /// All items of the box must be of the same type [T].
+  /// If [fromJson] and [toJson] are omitted, [T] must be a primitive, JSON-compatible type.
+  SleekBox<T> box<T>(String boxName, {FromJson<T>? fromJson, ToJson<T>? toJson}) {
+    return _boxes.putIfAbsent(
+      boxName,
+      () => SleekBox<T>._internal(
+        boxName,
+        this,
+        _rawData[_boxesKey][boxName],
+        fromJson,
+        toJson,
+      ),
+    ) as SleekBox<T>;
   }
 
   /// List all keys of the [SleekValue]s.
