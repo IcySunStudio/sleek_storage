@@ -1,4 +1,4 @@
-![sleek_storage](https://github.com/user-attachments/assets/dc9780e9-ed6b-4eef-8773-f73e4c694d09)
+![sleek_storage](https://raw.githubusercontent.com/IcySunStudio/sleek_storage/refs/heads/main/banner.png)
 
 [![Pub](https://img.shields.io/pub/v/sleek_storage.svg?label=sleek_storage)](https://pub.dartlang.org/packages/sleek_storage)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-green.svg)](https://opensource.org/licenses/BSD-3-Clause)
