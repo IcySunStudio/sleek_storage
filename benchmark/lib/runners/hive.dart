@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:hive_ce/hive.dart';
@@ -68,6 +69,20 @@ class HiveRunner extends BenchmarkRunner {
     });
     print(' - ${readDuration.inMilliseconds} ms');
 
+    // Stream
+    printNoBreak('[$name] Testing stream');
+    final streamDuration = await runTimed(() async {
+      final stream = box.watch(key: keys.first);
+      final completer = Completer<void>();
+      final subscription = stream.listen((event) {
+        completer.complete();
+      });
+      unawaited(box.put(keys.first, data));
+      await completer.future;
+      unawaited(subscription.cancel());
+    });
+    print(' - ${streamDuration.inMilliseconds} ms');
+
     // Close storage
     print('[$name] Done, closing storage');
     await Hive.close();
@@ -78,6 +93,7 @@ class HiveRunner extends BenchmarkRunner {
       singleWriteDuration: singleWriteDuration,
       reloadDuration: reloadDuration,
       readDuration: readDuration,
+      streamDuration: streamDuration,
       fileSizeInBytes: sizeInBytes,
     );
   }

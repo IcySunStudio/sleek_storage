@@ -4,6 +4,7 @@ class BenchResult {
     required this.singleWriteDuration,
     required this.reloadDuration,
     required this.readDuration,
+    this.streamDuration,
     required this.fileSizeInBytes,
   });
 
@@ -11,6 +12,7 @@ class BenchResult {
   final Duration singleWriteDuration;
   final Duration reloadDuration;
   final Duration readDuration;
+  final Duration? streamDuration;
   final int fileSizeInBytes;
 
   Duration get totalDuration => writeDuration + singleWriteDuration + reloadDuration + readDuration;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sleek_storage/sleek_storage.dart';
 import 'package:sleek_storage_benchmark/bench_result.dart';
 
@@ -61,6 +63,20 @@ class SleekStorageRunner extends BenchmarkRunner {
     });
     print(' - ${readDuration.inMilliseconds} ms');
 
+    // Stream
+    printNoBreak('[$name] Testing stream');
+    final streamDuration = await runTimed(() async {
+      final stream = box.watch(keys.first);
+      final completer = Completer<void>();
+      final subscription = stream.listen((event) {
+        completer.complete();
+      });
+      unawaited(box.put(keys.first, data));
+      await completer.future;
+      unawaited(subscription.cancel());
+    });
+    print(' - ${streamDuration.inMilliseconds} ms');
+
     // Close storage
     print('[$name] Done, closing storage');
     await storage.close();
@@ -71,6 +87,7 @@ class SleekStorageRunner extends BenchmarkRunner {
       singleWriteDuration: singleWriteDuration,
       reloadDuration: reloadDuration,
       readDuration: readDuration,
+      streamDuration: streamDuration,
       fileSizeInBytes: fileSize,
     );
   }

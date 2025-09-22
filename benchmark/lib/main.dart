@@ -56,9 +56,9 @@ Future<void> _runBenchmarks() async {
 
     // Save results to CSV
     final csv = const ListToCsvConverter().convert([
-      ['Competitor', 'Write (ms)', 'Reload (ms)', 'Read (ms)', 'File Size (MB)'],
+      ['Competitor', 'Write (ms)', 'Single Write (ms)', 'Reload (ms)', 'Read (ms)', 'Stream: Write-to-emit (ms)', 'File Size (MB)'],
       for (final entry in results.entries)
-        [entry.key, entry.value.writeDuration.inMilliseconds, entry.value.reloadDuration.inMilliseconds, entry.value.readDuration.inMilliseconds, entry.value.fileSizeDisplay],
+        [entry.key, entry.value.writeDuration.inMilliseconds, entry.value.singleWriteDuration.inMilliseconds, entry.value.reloadDuration.inMilliseconds, entry.value.readDuration.inMilliseconds, entry.value.streamDuration?.inMilliseconds ?? '-', entry.value.fileSizeDisplay],
     ]);
     final file = File('benchmark_#$operations.csv');
     await file.writeAsString(csv);
