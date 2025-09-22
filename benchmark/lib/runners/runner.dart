@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:sleek_storage_benchmark/bench_result.dart';
 
 abstract class BenchmarkRunner {
@@ -15,3 +17,5 @@ Future<Duration> runTimed(Future<void> Function() action) async {
   await action();
   return stopwatch.elapsed;
 }
+
+void printNoBreak(String message) => stdout.write(message);

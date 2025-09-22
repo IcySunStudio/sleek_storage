@@ -15,39 +15,51 @@ class SleekStorageRunner extends BenchmarkRunner {
   Future<BenchResult> run(String data, int operations) async {
     // Init and clear
     print('[$name] Init and clear');
-    final homeDir = await getApplicationSupportDirectory();
+    var homeDir = await getApplicationSupportDirectory();
+    if (await homeDir.exists()) await homeDir.delete(recursive: true);
+    homeDir = await homeDir.create();
     const boxName = 'box';
     var storage = await SleekStorage.getInstance(homeDir.path);
-    var box = await storage.box<String>(boxName);
+    var box = storage.box<String>(boxName);
 
     // Write
-    print('[$name] Writing $operations items');
+    printNoBreak('[$name] Writing $operations items');
     final keys = List.generate(operations, (i) => 'key_$i');
     final writeDuration = await runTimed(() async {
       await box.putAll({
         for (final key in keys) key: data,
       });
     });
+    print(' - ${writeDuration.inMilliseconds} ms');
+
+    // Single write
+    printNoBreak('[$name] Writing single item');
+    final singleWriteDuration = await runTimed(() async {
+      await box.put('single_key', data);
+    });
+    print(' - ${singleWriteDuration.inMilliseconds} ms');
 
     // Get file size
     final file = SleekStorage.getStorageFile(homeDir.path);
     final fileSize = await file.length();
 
     // Reload storage
-    print('[$name] Reloading storage');
+    printNoBreak('[$name] Reloading storage');
     await storage.close();
     final reloadDuration = await runTimed(() async {
       storage = await SleekStorage.getInstance(homeDir.path);
-      box = await storage.box<String>(boxName);
+      box = storage.box<String>(boxName);
     });
+    print(' - ${reloadDuration.inMilliseconds} ms');
 
     // Read
-    print('[$name] Reading $operations items');
+    printNoBreak('[$name] Reading $operations items');
     final readDuration = await runTimed(() async {
       for (final key in keys) {
         box.get(key);
       }
     });
+    print(' - ${readDuration.inMilliseconds} ms');
 
     // Close storage
     print('[$name] Done, closing storage');
@@ -56,6 +68,7 @@ class SleekStorageRunner extends BenchmarkRunner {
     // Return results
     return BenchResult(
       writeDuration: writeDuration,
+      singleWriteDuration: singleWriteDuration,
       reloadDuration: reloadDuration,
       readDuration: readDuration,
       fileSizeInBytes: fileSize,

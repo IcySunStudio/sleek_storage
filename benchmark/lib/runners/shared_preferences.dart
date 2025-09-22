@@ -15,7 +15,7 @@ class SharedPreferencesRunner extends BenchmarkRunner {
   String get name => 'Shared Preferences';
 
   @override
-  int? get maxOperations => 1000;   // SharedPreferences is very flow
+  int? get maxOperations => 1000;   // SharedPreferences is very slow
 
   @override
   Future<BenchResult> run(String data, int operations) async {
@@ -25,32 +25,42 @@ class SharedPreferencesRunner extends BenchmarkRunner {
     await storage.clear();
 
     // Write
-    print('[$name] Writing $operations items');
+    printNoBreak('[$name] Writing $operations items');
     final keys = List.generate(operations, (i) => 'key_$i');
     final writeDuration = await runTimed(() async {
       for (final key in keys) {
         await storage.setString(key, data);
       }
     });
+    print(' - ${writeDuration.inMilliseconds} ms');
+
+    // Single write
+    printNoBreak('[$name] Writing single item');
+    final singleWriteDuration = await runTimed(() async {
+      await storage.setString('single_key', data);
+    });
+    print(' - ${singleWriteDuration.inMilliseconds} ms');
 
     // Get file size
     final file = File(path.join((await getApplicationSupportDirectory()).path, 'shared_preferences.json'));
     final fileSize = await file.length();
 
     // Reload storage
-    print('[$name] Reloading storage');
+    printNoBreak('[$name] Reloading storage');
     final reloadDuration = await runTimed(() async {
       storage = await SharedPreferences.getInstance();
       //TODO remove ?    await storage.reload();
     });
+    print(' - ${reloadDuration.inMilliseconds} ms');
 
     // Read
-    print('[$name] Reading $operations items');
+    printNoBreak('[$name] Reading $operations items');
     final readDuration = await runTimed(() async {
       for (final key in keys) {
         storage.getString(key);
       }
     });
+    print(' - ${readDuration.inMilliseconds} ms');
 
     // Close storage
     print('[$name] Done, closing storage');
@@ -59,6 +69,7 @@ class SharedPreferencesRunner extends BenchmarkRunner {
     // Return results
     return BenchResult(
       writeDuration: writeDuration,
+      singleWriteDuration: singleWriteDuration,
       reloadDuration: reloadDuration,
       readDuration: readDuration,
       fileSizeInBytes: fileSize,

@@ -20,22 +20,28 @@ class HiveRunner extends BenchmarkRunner {
     print('[$name] Init and clear');
     var homeDir = await getApplicationSupportDirectory();
     homeDir = Directory(path.join(homeDir.path, 'hive'));
-    if (await homeDir.exists()) {
-      await homeDir.delete(recursive: true);
-    }
+    if (await homeDir.exists()) await homeDir.delete(recursive: true);
     homeDir = await homeDir.create();
     Hive.init(homeDir.path);
     const boxName = 'box';
     var box = await Hive.openBox<String>(boxName);
 
     // Write
-    print('[$name] Writing $operations items');
+    printNoBreak('[$name] Writing $operations items');
     final keys = List.generate(operations, (i) => 'key_$i');
     final writeDuration = await runTimed(() async {
       await box.putAll({
         for (final key in keys) key: data,
       });
     });
+    print(' - ${writeDuration.inMilliseconds} ms');
+
+    // Single write
+    printNoBreak('[$name] Writing single item');
+    final singleWriteDuration = await runTimed(() async {
+      await box.put('single_key', data);
+    });
+    print(' - ${singleWriteDuration.inMilliseconds} ms');
 
     // Get file size
     int sizeInBytes = 0;
@@ -46,19 +52,21 @@ class HiveRunner extends BenchmarkRunner {
     }
 
     // Reload storage
-    print('[$name] Reloading storage');
+    printNoBreak('[$name] Reloading storage');
     await Hive.close();
     final reloadDuration = await runTimed(() async {
       box = await Hive.openBox<String>(boxName);
     });
+    print(' - ${reloadDuration.inMilliseconds} ms');
 
     // Read
-    print('[$name] Reading $operations items');
+    printNoBreak('[$name] Reading $operations items');
     final readDuration = await runTimed(() async {
       for (final key in keys) {
         box.get(key);
       }
     });
+    print(' - ${readDuration.inMilliseconds} ms');
 
     // Close storage
     print('[$name] Done, closing storage');
@@ -67,6 +75,7 @@ class HiveRunner extends BenchmarkRunner {
     // Return results
     return BenchResult(
       writeDuration: writeDuration,
+      singleWriteDuration: singleWriteDuration,
       reloadDuration: reloadDuration,
       readDuration: readDuration,
       fileSizeInBytes: sizeInBytes,
