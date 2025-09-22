@@ -9,8 +9,7 @@ import 'models/basic.dart';
 import 'models/nested.dart';
 
 void main() async {
-  group('Tests', () {
-    // --- Basic tests ---
+  group('Basic tests', () {
     const intValue = 42;
     test('Value', () async {
       // Create a SleekStorage instance
@@ -188,7 +187,7 @@ void main() async {
 
       // Open box
       const name = 'testBox';
-      final box = storage.box<BasicClass>(name, fromJson: (key, json) => BasicClass.fromJson(json), toJson: (obj) => obj.toJson());
+      final box = storage.box<BasicClass>(name, fromJson: (key, json) => BasicClass.fromJson(json));
 
       // Populate box with basic objects with same internal value
       for (var i = 0; i < 10; i++) {
@@ -333,15 +332,15 @@ void main() async {
       await Future.delayed(Duration.zero);    // Ensure lastSavedAt is updated (next event loop)
       expect(saveCount, 2);
     });
-
-    // --- Advanced tests ---
+  });
+  group('Advanced tests', () {
     test('Complex object', () async {
       // Create a SleekStorage instance
       var storage = await setUp();
 
       // Open box
       const name = 'objectBox';
-      var box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
+      var box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json));
 
       // Add value
       final myObject = MyClass.random(1);
@@ -356,7 +355,7 @@ void main() async {
 
       // Check if the value is saved correctly
       storage = await setUp(deleteFileFirst: false);
-      box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
+      box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json));
       value = box.get('key1');
       expect(value, myObject);
     });
@@ -366,7 +365,7 @@ void main() async {
 
       // Open box
       const name = 'objectBox';
-      var box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
+      var box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json));
 
       // Add value
       const length = 10000;
@@ -387,7 +386,7 @@ void main() async {
       print('Time taken to load storage: ${stopwatch.elapsedMilliseconds} ms');
 
       stopwatch = Stopwatch()..start();
-      box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json), toJson: (obj) => obj.toJson());
+      box = storage.box<MyClass>(name, fromJson: (key, json) => MyClass.fromJson(json));
       print('Time taken to open box: ${stopwatch.elapsedMilliseconds} ms');
 
       final readList = <MyClass>[];
