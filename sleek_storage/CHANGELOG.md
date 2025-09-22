@@ -1,3 +1,6 @@
+## 2.0.1
+* `getInstance` will now properly throw if store cannot be read.
+
 ## 2.0.0
 * BREAKING: `Box.watch` now emits `null` when value is deleted or when box is cleared.
 * BREAKING: `fromJson` now also provides the key.

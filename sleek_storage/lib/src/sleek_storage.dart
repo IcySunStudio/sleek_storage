@@ -47,6 +47,7 @@ class SleekStorage {
   /// Returns a new [SleekStorage] instance.
   ///
   /// Because this is reading from disk, it shouldn't be awaited in performance-sensitive blocks.
+  /// It may throw if store can't be read.
   static Future<SleekStorage> getInstance(String directoryPath, {String? storageName}) async {
     // Get file instance
     final file = getStorageFile(directoryPath, storageName);
@@ -202,16 +203,15 @@ class SleekStorage {
     }
   }
 
+  /// Read store file from disk, and decode content as JSON.
+  /// May throw if file reading or JSON decoding fails.
+  /// Returns null if file doesn't exists or is empty.
   static Future<JsonObject?> _readFromFileSafe(File file) async {
-    try {
-      if (await file.exists()) {
-        final dataString = await file.readAsString();
-        if (dataString.isNotEmpty) {
-          return json.decode(dataString);
-        }
+    if (await file.exists()) {
+      final dataString = await file.readAsString();
+      if (dataString.isNotEmpty) {
+        return json.decode(dataString);
       }
-    } catch(e) {
-      // TODO handle error
     }
     return null;
   }
