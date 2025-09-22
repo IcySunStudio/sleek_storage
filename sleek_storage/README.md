@@ -1,4 +1,4 @@
-![sleek_storage](https://github.com/user-attachments/assets/14e6365b-8dde-4b56-a23a-68032f7649ac)
+![sleek_storage](https://github.com/user-attachments/assets/dc9780e9-ed6b-4eef-8773-f73e4c694d09)
 
 [![Pub](https://img.shields.io/pub/v/sleek_storage.svg?label=sleek_storage)](https://pub.dartlang.org/packages/sleek_storage)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-green.svg)](https://opensource.org/licenses/BSD-3-Clause)
@@ -8,6 +8,8 @@
 **Fast. Simple. Reactive.**
 
 A simple, reactive, and lightweight key-value store written in pure Dart. Features instant, synchronous reads, atomic file writes, and fully type-safe collections, all embracing the JSON serialization you already use in your app—no new formats, no codegen, no headaches.
+
+On a Flutter project ? See [![Pub](https://img.shields.io/pub/v/sleek_storage.svg?label=sleek_storage_flutter)](https://pub.dartlang.org/packages/sleek_storage_flutter) that provides handy Flutter-specific initialization.
 
 ---
 
