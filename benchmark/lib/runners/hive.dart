@@ -71,17 +71,20 @@ class HiveRunner extends BenchmarkRunner {
 
     // Stream
     printNoBreak('[$name] Testing stream');
-    final streamMeanDurationInMs = await runTimed(() async {
+    const meanCount = 10;
+    final streamDurationsInMs = await runTimedMean(meanCount, () {
       final stream = box.watch(key: keys.first);
-      final completer = Completer<void>();
-      final subscription = stream.listen((event) {
-        completer.complete();
+      final completer = Completer<Future<void>>();
+      late final Future<void> closingFuture;
+      late final StreamSubscription subscription;
+      subscription = stream.listen((_) {
+        completer.complete(closingFuture);
+        subscription.cancel();
       });
-      unawaited(box.put(keys.first, data));
-      await completer.future;
-      unawaited(subscription.cancel());
+      closingFuture = box.put(keys.first, data);
+      return completer.future;
     });
-    print(' - $streamMeanDurationInMs ms');
+    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, mean: ${streamDurationsInMs.mean} ms ($meanCount runs)');
 
     // Close storage
     print('[$name] Done, closing storage');
@@ -93,7 +96,7 @@ class HiveRunner extends BenchmarkRunner {
       singleWriteDurationInMs: singleWriteDurationInMs,
       reloadDurationInMs: reloadDurationInMs,
       readDurationInMs: readDurationInMs,
-      streamMeanDurationInMs: streamMeanDurationInMs,
+      streamMeanDurationInMs: streamDurationsInMs.mean,
       fileSizeInBytes: sizeInBytes,
     );
   }

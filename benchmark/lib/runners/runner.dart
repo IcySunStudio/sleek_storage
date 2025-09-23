@@ -19,4 +19,41 @@ Future<int> runTimed(Future<void> Function() action) async {
   return stopwatch.elapsed.inMilliseconds;
 }
 
+/// Callback that returns a future to be measured, which itself return a future to be completed after the measured future is done
+typedef BenchmarkCallback = Future<Future<void>> Function();
+
+Future<DurationStats> runTimedMean(int count, BenchmarkCallback action) async {
+  var totalMilliseconds = 0;
+  var minMilliseconds = 10000000;
+  var maxMilliseconds = 0;
+  for (var i = 0; i < count; i++) {
+    // Run task
+    late final Future<void> closingFuture;
+    final duration = (await runTimed(() async {
+      closingFuture = await action();
+    }));
+
+    // Collect stats
+    totalMilliseconds += duration;
+    if (duration < minMilliseconds) minMilliseconds = duration;
+    if (duration > maxMilliseconds) maxMilliseconds = duration;
+
+    // Wait for closing
+    await closingFuture;
+  }
+  return DurationStats(
+    mean: totalMilliseconds ~/ count,
+    min: minMilliseconds,
+    max: maxMilliseconds,
+  );
+}
+
+class DurationStats {
+  const DurationStats({required this.mean, required this.min, required this.max});
+
+  final int mean;
+  final int min;
+  final int max;
+}
+
 void printNoBreak(String message) => stdout.write(message);
