@@ -21,46 +21,46 @@ class SleekStorageRunner extends BenchmarkRunner {
     var box = storage.box<String>(boxName);
 
     // Write
-    printNoBreak('[$name] Writing $operations items');
+    print('[$name] Writing $operations items');
     final keys = List.generate(operations, (i) => 'key_$i');
     final writeDurationInMs = await runTimed(() {
       return box.putAll({
         for (final key in keys) key: data,
       });
     });
-    print(' - $writeDurationInMs ms');
+    print('[$name] $operations items written in $writeDurationInMs ms');
 
     // Single write
-    printNoBreak('[$name] Writing single item');
+    print('[$name] Writing single item');
     final singleWriteDurationInMs = await runTimed(() {
       return box.put('single_key', data);
     });
-    print(' - $singleWriteDurationInMs ms');
+    print('[$name] single item written in $singleWriteDurationInMs ms');
 
     // Get file size
     final file = SleekStorage.getStorageFile(homeDir.path);
     final fileSize = await file.length();
 
     // Reload storage
-    printNoBreak('[$name] Reloading storage');
+    print('[$name] Reloading storage');
     await storage.close();
     final reloadDurationInMs = await runTimed(() async {
       storage = await SleekStorage.getInstance(homeDir.path);
       box = storage.box<String>(boxName);
     });
-    print(' - $reloadDurationInMs ms');
+    print('[$name] Storage reloaded in $reloadDurationInMs ms');
 
     // Read
-    printNoBreak('[$name] Reading $operations items');
+    print('[$name] Reading $operations items');
     final readDurationInMs = await runTimed(() async {
       for (final key in keys) {
         box.get(key);
       }
     });
-    print(' - $readDurationInMs ms');
+    print('[$name] $operations items read in $readDurationInMs ms');
 
     // Stream
-    printNoBreak('[$name] Testing stream');
+    print('[$name] Testing stream');
     final streamDurationsInMs = await runTimedAverage(streamRuns, () {
       final stream = box.watch(keys.first);
       final completer = Completer<Future<void>>();
@@ -73,7 +73,7 @@ class SleekStorageRunner extends BenchmarkRunner {
       closingFuture = box.put(keys.first, data);
       return completer.future;
     });
-    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, average: ${streamDurationsInMs.average} ms ($streamRuns runs)');
+    print('[$name] Stream tested in [Min: ${streamDurationsInMs.min} ms, Max: ${streamDurationsInMs.max} ms, Average: ${streamDurationsInMs.average} ms]');
 
     // Close storage
     print('[$name] Done, closing storage');

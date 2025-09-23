@@ -26,7 +26,7 @@ class DriftRunner extends BenchmarkRunner {
     var database = AppDatabase(homeDir);
 
     // Write
-    printNoBreak('[$name] Writing $operations items');
+    print('[$name] Writing $operations items');
     final insertableData = StringItemsCompanion.insert(value: data);
     final writeDurationInMs = await runTimed(() {
       return database.batch((batch) {
@@ -35,15 +35,15 @@ class DriftRunner extends BenchmarkRunner {
         ]);
       });
     });
-    print(' - $writeDurationInMs ms');
+    print('[$name] $operations items written in $writeDurationInMs ms');
 
     // Single write
-    printNoBreak('[$name] Writing single item');
+    print('[$name] Writing single item');
     late final int id;
     final singleWriteDurationInMs = await runTimed(() async {
       id = await database.into(database.stringItems).insert(insertableData);
     });
-    print(' - $singleWriteDurationInMs ms');
+    print('[$name] single item written in $singleWriteDurationInMs ms');
 
     // Get file size
     int sizeInBytes = 0;
@@ -54,22 +54,22 @@ class DriftRunner extends BenchmarkRunner {
     }
 
     // Reload storage
-    printNoBreak('[$name] Reloading storage');
+    print('[$name] Reloading storage');
     await database.close();
     final reloadDurationInMs = await runTimed(() async {
       database = AppDatabase(homeDir);
     });
-    print(' - $reloadDurationInMs ms');
+    print('[$name] Storage reloaded in $reloadDurationInMs ms');
 
     // Read
-    printNoBreak('[$name] Reading $operations items');
+    print('[$name] Reading $operations items');
     final readDurationInMs = await runTimed(() {
       return database.select(database.stringItems).get();
     });
-    print(' - $readDurationInMs ms');
+    print('[$name] $operations items read in $readDurationInMs ms');
 
     // Stream
-    printNoBreak('[$name] Testing stream');
+    print('[$name] Testing stream');
     final streamDurationsInMs = await runTimedAverage(streamRuns, () {
       final stream = (database.select(database.stringItems)..where((t) => t.id.equals(id))).watchSingle();
       final completer = Completer<Future<void>>();
@@ -85,7 +85,7 @@ class DriftRunner extends BenchmarkRunner {
       ));
       return completer.future;
     });
-    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, average: ${streamDurationsInMs.average} ms ($streamRuns runs)');
+    print('[$name] Stream test completed [Min: ${streamDurationsInMs.min} ms, Max: ${streamDurationsInMs.max} ms, Average: ${streamDurationsInMs.average} ms]');
 
     // Close storage
     print('[$name] Done, closing storage');

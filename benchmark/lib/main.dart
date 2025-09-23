@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:sleek_storage_benchmark/bench_result.dart';
 import 'package:sleek_storage_benchmark/models/test_model_advanced.dart';
 import 'package:sleek_storage_benchmark/runners/drift.dart';
@@ -62,7 +64,8 @@ Future<void> _runBenchmarks() async {
       for (final entry in results.entries)
         [entry.key, entry.value.writeDurationInMs, entry.value.singleWriteDurationInMs, entry.value.reloadDurationInMs, entry.value.readDurationInMs, entry.value.streamDurationStatsInMs?.min ?? '-', entry.value.streamDurationStatsInMs?.max ?? '-', entry.value.streamDurationStatsInMs?.average ?? '-', entry.value.fileSizeDisplay],
     ]);
-    final file = File('benchmark_#$operations.csv');
+    final homeDir = await getApplicationSupportDirectory();
+    final file = File(path.join(homeDir.path, 'benchmark_#$operations.csv'));
     await file.writeAsString(csv);
     print('=> Results saved to ${file.path}');
   }

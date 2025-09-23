@@ -67,5 +67,3 @@ class DurationStats {
   final int min;
   final int max;
 }
-
-void printNoBreak(String message) => stdout.write(message);

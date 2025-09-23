@@ -25,42 +25,42 @@ class SharedPreferencesRunner extends BenchmarkRunner {
     await storage.clear();
 
     // Write
-    printNoBreak('[$name] Writing $operations items');
+    print('[$name] Writing $operations items');
     final keys = List.generate(operations, (i) => 'key_$i');
     final writeDurationInMs = await runTimed(() async {
       for (final key in keys) {
         await storage.setString(key, data);
       }
     });
-    print(' - $writeDurationInMs ms');
+    print('[$name] $operations items written in $writeDurationInMs ms');
 
     // Single write
-    printNoBreak('[$name] Writing single item');
+    print('[$name] Writing single item');
     final singleWriteDurationInMs = await runTimed(() {
       return storage.setString('single_key', data);
     });
-    print(' - $singleWriteDurationInMs ms');
+    print('[$name] single item written in $singleWriteDurationInMs ms');
 
     // Get file size
     final file = File(path.join((await getApplicationSupportDirectory()).path, 'shared_preferences.json'));
     final fileSize = await file.length();
 
     // Reload storage
-    printNoBreak('[$name] Reloading storage');
+    print('[$name] Reloading storage');
     final reloadDurationInMs = await runTimed(() async {
       storage = await SharedPreferences.getInstance();
       //TODO remove ?    await storage.reload();
     });
-    print(' - $reloadDurationInMs ms');
+    print('[$name] Storage reloaded in $reloadDurationInMs ms');
 
     // Read
-    printNoBreak('[$name] Reading $operations items');
+    print('[$name] Reading $operations items');
     final readDurationInMs = await runTimed(() async {
       for (final key in keys) {
         storage.getString(key);
       }
     });
-    print(' - $readDurationInMs ms');
+    print('[$name] $operations items read in $readDurationInMs ms');
 
     // Close storage
     print('[$name] Done, closing storage');
