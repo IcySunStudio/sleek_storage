@@ -17,7 +17,7 @@ class BenchResult {
   final DurationStats? streamDurationStatsInMs;
   final int fileSizeInBytes;
 
-  int get totalDurationInMs => writeDurationInMs + singleWriteDurationInMs + reloadDurationInMs + readDurationInMs + (streamDurationStatsInMs?.mean ?? 0);
+  int get totalDurationInMs => writeDurationInMs + singleWriteDurationInMs + reloadDurationInMs + readDurationInMs + (streamDurationStatsInMs?.average ?? 0);
   double get fileSizeInMB => fileSizeInBytes / (1024 * 1024);
   String get fileSizeDisplay => '${fileSizeInMB.toStringAsFixed(1)} MB';
 }

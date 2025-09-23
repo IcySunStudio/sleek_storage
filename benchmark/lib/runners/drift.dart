@@ -70,7 +70,7 @@ class DriftRunner extends BenchmarkRunner {
 
     // Stream
     printNoBreak('[$name] Testing stream');
-    final streamDurationsInMs = await runTimedMean(streamRuns, () {
+    final streamDurationsInMs = await runTimedAverage(streamRuns, () {
       final stream = (database.select(database.stringItems)..where((t) => t.id.equals(id))).watchSingle();
       final completer = Completer<Future<void>>();
       late final Future<void> closingFuture;
@@ -85,7 +85,7 @@ class DriftRunner extends BenchmarkRunner {
       ));
       return completer.future;
     });
-    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, mean: ${streamDurationsInMs.mean} ms ($streamRuns runs)');
+    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, average: ${streamDurationsInMs.average} ms ($streamRuns runs)');
 
     // Close storage
     print('[$name] Done, closing storage');

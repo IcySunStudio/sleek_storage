@@ -65,7 +65,7 @@ class HiveRunner extends BenchmarkRunner {
 
     // Stream
     printNoBreak('[$name] Testing stream');
-    final streamDurationsInMs = await runTimedMean(streamRuns, () {
+    final streamDurationsInMs = await runTimedAverage(streamRuns, () {
       final stream = box.watch(key: keys.first);
       final completer = Completer<Future<void>>();
       late final Future<void> closingFuture;
@@ -77,7 +77,7 @@ class HiveRunner extends BenchmarkRunner {
       closingFuture = box.put(keys.first, data);
       return completer.future;
     });
-    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, mean: ${streamDurationsInMs.mean} ms ($streamRuns runs)');
+    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, average: ${streamDurationsInMs.average} ms ($streamRuns runs)');
 
     // Close storage
     print('[$name] Done, closing storage');

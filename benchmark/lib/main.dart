@@ -58,9 +58,9 @@ Future<void> _runBenchmarks() async {
 
     // Save results to CSV
     final csv = const ListToCsvConverter().convert([
-      ['Competitor', 'Write (ms)', 'Single Write (ms)', 'Reload (ms)', 'Read (ms)', 'Stream: Write-to-emit [Min] (ms)', 'Stream: Write-to-emit [Max] (ms)', 'Stream: Write-to-emit [Mean] (ms)', 'File Size (MB)'],
+      ['Competitor', 'Write (ms)', 'Single Write (ms)', 'Reload (ms)', 'Read (ms)', 'Stream: Write-to-emit [Min] (ms)', 'Stream: Write-to-emit [Max] (ms)', 'Stream: Write-to-emit [Average] (ms)', 'File Size (MB)'],
       for (final entry in results.entries)
-        [entry.key, entry.value.writeDurationInMs, entry.value.singleWriteDurationInMs, entry.value.reloadDurationInMs, entry.value.readDurationInMs, entry.value.streamDurationStatsInMs?.min ?? '-', entry.value.streamDurationStatsInMs?.max ?? '-', entry.value.streamDurationStatsInMs?.mean ?? '-', entry.value.fileSizeDisplay],
+        [entry.key, entry.value.writeDurationInMs, entry.value.singleWriteDurationInMs, entry.value.reloadDurationInMs, entry.value.readDurationInMs, entry.value.streamDurationStatsInMs?.min ?? '-', entry.value.streamDurationStatsInMs?.max ?? '-', entry.value.streamDurationStatsInMs?.average ?? '-', entry.value.fileSizeDisplay],
     ]);
     final file = File('benchmark_#$operations.csv');
     await file.writeAsString(csv);

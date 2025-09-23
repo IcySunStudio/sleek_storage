@@ -34,7 +34,7 @@ Future<int> runTimed(Future<void> Function() action) async {
 /// Callback that returns a future to be measured, which itself return a future to be completed after the measured future is done
 typedef BenchmarkCallback = Future<Future<void>> Function();
 
-Future<DurationStats> runTimedMean(int count, BenchmarkCallback action) async {
+Future<DurationStats> runTimedAverage(int count, BenchmarkCallback action) async {
   var totalMilliseconds = 0;
   var minMilliseconds = 10000000;
   var maxMilliseconds = 0;
@@ -54,16 +54,16 @@ Future<DurationStats> runTimedMean(int count, BenchmarkCallback action) async {
     await closingFuture;
   }
   return DurationStats(
-    mean: totalMilliseconds ~/ count,
+    average: totalMilliseconds ~/ count,
     min: minMilliseconds,
     max: maxMilliseconds,
   );
 }
 
 class DurationStats {
-  const DurationStats({required this.mean, required this.min, required this.max});
+  const DurationStats({required this.average, required this.min, required this.max});
 
-  final int mean;
+  final int average;
   final int min;
   final int max;
 }
