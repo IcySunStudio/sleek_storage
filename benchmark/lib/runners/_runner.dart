@@ -4,6 +4,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:sleek_storage_benchmark/bench_result.dart';
 
+const streamRuns = 10;
+
 abstract class BenchmarkRunner {
   const BenchmarkRunner();
 

@@ -61,8 +61,7 @@ class SleekStorageRunner extends BenchmarkRunner {
 
     // Stream
     printNoBreak('[$name] Testing stream');
-    const meanCount = 10;
-    final streamDurationsInMs = await runTimedMean(meanCount, () {
+    final streamDurationsInMs = await runTimedMean(streamRuns, () {
       final stream = box.watch(keys.first);
       final completer = Completer<Future<void>>();
       late final Future<void> closingFuture;
@@ -74,7 +73,7 @@ class SleekStorageRunner extends BenchmarkRunner {
       closingFuture = box.put(keys.first, data);
       return completer.future;
     });
-    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, mean: ${streamDurationsInMs.mean} ms ($meanCount runs)');
+    print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, mean: ${streamDurationsInMs.mean} ms ($streamRuns runs)');
 
     // Close storage
     print('[$name] Done, closing storage');
