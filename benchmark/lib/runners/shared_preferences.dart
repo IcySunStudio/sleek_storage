@@ -36,8 +36,8 @@ class SharedPreferencesRunner extends BenchmarkRunner {
 
     // Single write
     printNoBreak('[$name] Writing single item');
-    final singleWriteDurationInMs = await runTimed(() async {
-      await storage.setString('single_key', data);
+    final singleWriteDurationInMs = await runTimed(() {
+      return storage.setString('single_key', data);
     });
     print(' - $singleWriteDurationInMs ms');
 

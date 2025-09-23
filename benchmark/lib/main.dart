@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:csv/csv.dart';
 import 'package:sleek_storage_benchmark/bench_result.dart';
 import 'package:sleek_storage_benchmark/models/test_model_advanced.dart';
+import 'package:sleek_storage_benchmark/runners/drift.dart';
 import 'package:sleek_storage_benchmark/runners/hive.dart';
 import 'package:sleek_storage_benchmark/runners/shared_preferences.dart';
 import 'package:sleek_storage_benchmark/runners/sleek_storage.dart';
@@ -32,6 +33,7 @@ const competitors = [
   SleekStorageRunner(),
   SharedPreferencesRunner(),
   HiveRunner(),
+  DriftRunner(),
 ];
 
 Future<void> _runBenchmarks() async {

@@ -1,40 +1,47 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:hive_ce/hive.dart';
+import 'package:drift/drift.dart';
+import 'package:drift_flutter/drift_flutter.dart';
 import 'package:sleek_storage_benchmark/bench_result.dart';
+
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 import '_runner.dart';
 
-class HiveRunner extends BenchmarkRunner {
-  const HiveRunner();
+part 'drift.g.dart';
+
+class DriftRunner extends BenchmarkRunner {
+  const DriftRunner();
 
   @override
-  String get name => 'Hive CE';
+  String get name => 'Drift';
 
   @override
   Future<BenchResult> run(String data, int operations) async {
     // Init and clear
     print('[$name] Init and clear');
-    final homeDir = await getClearDirectory('hive');
-    Hive.init(homeDir.path);
-    const boxName = 'box';
-    var box = await Hive.openBox<String>(boxName);
+    final homeDir = await getClearDirectory('drift');
+    var database = AppDatabase(homeDir);
 
     // Write
     printNoBreak('[$name] Writing $operations items');
-    final keys = List.generate(operations, (i) => 'key_$i');
+    final insertableData = StringItemsCompanion.insert(value: data);
     final writeDurationInMs = await runTimed(() {
-      return box.putAll({
-        for (final key in keys) key: data,
+      return database.batch((batch) {
+        batch.insertAll(database.stringItems, [
+          for (int i=0; i < operations; i++) insertableData,
+        ]);
       });
     });
     print(' - $writeDurationInMs ms');
 
     // Single write
     printNoBreak('[$name] Writing single item');
-    final singleWriteDurationInMs = await runTimed(() {
-      return box.put('single_key', data);
+    late final int id;
+    final singleWriteDurationInMs = await runTimed(() async {
+      id = await database.into(database.stringItems).insert(insertableData);
     });
     print(' - $singleWriteDurationInMs ms');
 
@@ -48,18 +55,16 @@ class HiveRunner extends BenchmarkRunner {
 
     // Reload storage
     printNoBreak('[$name] Reloading storage');
-    await Hive.close();
+    await database.close();
     final reloadDurationInMs = await runTimed(() async {
-      box = await Hive.openBox<String>(boxName);
+      database = AppDatabase(homeDir);
     });
     print(' - $reloadDurationInMs ms');
 
     // Read
     printNoBreak('[$name] Reading $operations items');
-    final readDurationInMs = await runTimed(() async {
-      for (final key in keys) {
-        box.get(key);
-      }
+    final readDurationInMs = await runTimed(() {
+      return database.select(database.stringItems).get();
     });
     print(' - $readDurationInMs ms');
 
@@ -67,7 +72,7 @@ class HiveRunner extends BenchmarkRunner {
     printNoBreak('[$name] Testing stream');
     const meanCount = 10;
     final streamDurationsInMs = await runTimedMean(meanCount, () {
-      final stream = box.watch(key: keys.first);
+      final stream = (database.select(database.stringItems)..where((t) => t.id.equals(id))).watchSingle();
       final completer = Completer<Future<void>>();
       late final Future<void> closingFuture;
       late final StreamSubscription subscription;
@@ -75,14 +80,17 @@ class HiveRunner extends BenchmarkRunner {
         completer.complete(closingFuture);
         subscription.cancel();
       });
-      closingFuture = box.put(keys.first, data);
+      closingFuture = database.update(database.stringItems).replace(StringItemsCompanion.insert(
+        id: Value(id),
+        value: data,
+      ));
       return completer.future;
     });
     print(' - min: ${streamDurationsInMs.min} ms, max: ${streamDurationsInMs.max} ms, mean: ${streamDurationsInMs.mean} ms ($meanCount runs)');
 
     // Close storage
     print('[$name] Done, closing storage');
-    await Hive.close();
+    await database.close();
 
     // Return results
     return BenchResult(
@@ -94,4 +102,22 @@ class HiveRunner extends BenchmarkRunner {
       fileSizeInBytes: sizeInBytes,
     );
   }
+}
+
+@DriftDatabase(tables: [StringItems])
+class AppDatabase extends _$AppDatabase {
+  AppDatabase(Directory directory) : super(driftDatabase(
+    name: 'database',
+    native: DriftNativeOptions(
+      databaseDirectory: () async => directory,
+    ),
+  ));
+
+  @override
+  int get schemaVersion => 1;
+}
+
+class StringItems extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get value => text()();
 }

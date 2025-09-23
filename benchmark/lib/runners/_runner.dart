@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:sleek_storage_benchmark/bench_result.dart';
 
 abstract class BenchmarkRunner {
@@ -10,6 +12,14 @@ abstract class BenchmarkRunner {
   int? get maxOperations => null;
 
   Future<BenchResult> run(String data, int operations);
+}
+
+/// Returns a cleared directory at the given [subdir], where data can be stored.
+Future<Directory> getClearDirectory(String subdir) async {
+  var homeDir = await getApplicationSupportDirectory();
+  homeDir = Directory(path.join(homeDir.path, subdir));
+  if (await homeDir.exists()) await homeDir.delete(recursive: true);
+  return await homeDir.create();
 }
 
 /// Runs the given [action] and returns the elapsed time in milliseconds.

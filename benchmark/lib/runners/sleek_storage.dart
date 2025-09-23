@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:sleek_storage/sleek_storage.dart';
 import 'package:sleek_storage_benchmark/bench_result.dart';
 
-import 'package:path_provider/path_provider.dart';
-
 import '_runner.dart';
 
 class SleekStorageRunner extends BenchmarkRunner {
@@ -17,18 +15,16 @@ class SleekStorageRunner extends BenchmarkRunner {
   Future<BenchResult> run(String data, int operations) async {
     // Init and clear
     print('[$name] Init and clear');
-    var homeDir = await getApplicationSupportDirectory();
-    if (await homeDir.exists()) await homeDir.delete(recursive: true);
-    homeDir = await homeDir.create();
-    const boxName = 'box';
+    final homeDir = await getClearDirectory('sleek_storage');
     var storage = await SleekStorage.getInstance(homeDir.path);
+    const boxName = 'box';
     var box = storage.box<String>(boxName);
 
     // Write
     printNoBreak('[$name] Writing $operations items');
     final keys = List.generate(operations, (i) => 'key_$i');
-    final writeDurationInMs = await runTimed(() async {
-      await box.putAll({
+    final writeDurationInMs = await runTimed(() {
+      return box.putAll({
         for (final key in keys) key: data,
       });
     });
@@ -36,8 +32,8 @@ class SleekStorageRunner extends BenchmarkRunner {
 
     // Single write
     printNoBreak('[$name] Writing single item');
-    final singleWriteDurationInMs = await runTimed(() async {
-      await box.put('single_key', data);
+    final singleWriteDurationInMs = await runTimed(() {
+      return box.put('single_key', data);
     });
     print(' - $singleWriteDurationInMs ms');
 
