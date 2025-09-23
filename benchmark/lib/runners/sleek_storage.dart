@@ -27,19 +27,19 @@ class SleekStorageRunner extends BenchmarkRunner {
     // Write
     printNoBreak('[$name] Writing $operations items');
     final keys = List.generate(operations, (i) => 'key_$i');
-    final writeDuration = await runTimed(() async {
+    final writeDurationInMs = await runTimed(() async {
       await box.putAll({
         for (final key in keys) key: data,
       });
     });
-    print(' - ${writeDuration.inMilliseconds} ms');
+    print(' - $writeDurationInMs ms');
 
     // Single write
     printNoBreak('[$name] Writing single item');
-    final singleWriteDuration = await runTimed(() async {
+    final singleWriteDurationInMs = await runTimed(() async {
       await box.put('single_key', data);
     });
-    print(' - ${singleWriteDuration.inMilliseconds} ms');
+    print(' - $singleWriteDurationInMs ms');
 
     // Get file size
     final file = SleekStorage.getStorageFile(homeDir.path);
@@ -48,24 +48,24 @@ class SleekStorageRunner extends BenchmarkRunner {
     // Reload storage
     printNoBreak('[$name] Reloading storage');
     await storage.close();
-    final reloadDuration = await runTimed(() async {
+    final reloadDurationInMs = await runTimed(() async {
       storage = await SleekStorage.getInstance(homeDir.path);
       box = storage.box<String>(boxName);
     });
-    print(' - ${reloadDuration.inMilliseconds} ms');
+    print(' - $reloadDurationInMs ms');
 
     // Read
     printNoBreak('[$name] Reading $operations items');
-    final readDuration = await runTimed(() async {
+    final readDurationInMs = await runTimed(() async {
       for (final key in keys) {
         box.get(key);
       }
     });
-    print(' - ${readDuration.inMilliseconds} ms');
+    print(' - $readDurationInMs ms');
 
     // Stream
     printNoBreak('[$name] Testing stream');
-    final streamDuration = await runTimed(() async {
+    final streamMeanDurationInMs = await runTimed(() async {
       final stream = box.watch(keys.first);
       final completer = Completer<void>();
       final subscription = stream.listen((event) {
@@ -75,7 +75,7 @@ class SleekStorageRunner extends BenchmarkRunner {
       await completer.future;
       unawaited(subscription.cancel());
     });
-    print(' - ${streamDuration.inMilliseconds} ms');
+    print(' - $streamMeanDurationInMs ms');
 
     // Close storage
     print('[$name] Done, closing storage');
@@ -83,11 +83,11 @@ class SleekStorageRunner extends BenchmarkRunner {
 
     // Return results
     return BenchResult(
-      writeDuration: writeDuration,
-      singleWriteDuration: singleWriteDuration,
-      reloadDuration: reloadDuration,
-      readDuration: readDuration,
-      streamDuration: streamDuration,
+      writeDurationInMs: writeDurationInMs,
+      singleWriteDurationInMs: singleWriteDurationInMs,
+      reloadDurationInMs: reloadDurationInMs,
+      readDurationInMs: readDurationInMs,
+      streamMeanDurationInMs: streamMeanDurationInMs,
       fileSizeInBytes: fileSize,
     );
   }

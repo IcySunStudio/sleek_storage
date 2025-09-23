@@ -12,10 +12,11 @@ abstract class BenchmarkRunner {
   Future<BenchResult> run(String data, int operations);
 }
 
-Future<Duration> runTimed(Future<void> Function() action) async {
+/// Runs the given [action] and returns the elapsed time in milliseconds.
+Future<int> runTimed(Future<void> Function() action) async {
   final stopwatch = Stopwatch()..start();
   await action();
-  return stopwatch.elapsed;
+  return stopwatch.elapsed.inMilliseconds;
 }
 
 void printNoBreak(String message) => stdout.write(message);

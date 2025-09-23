@@ -27,19 +27,19 @@ class SharedPreferencesRunner extends BenchmarkRunner {
     // Write
     printNoBreak('[$name] Writing $operations items');
     final keys = List.generate(operations, (i) => 'key_$i');
-    final writeDuration = await runTimed(() async {
+    final writeDurationInMs = await runTimed(() async {
       for (final key in keys) {
         await storage.setString(key, data);
       }
     });
-    print(' - ${writeDuration.inMilliseconds} ms');
+    print(' - $writeDurationInMs ms');
 
     // Single write
     printNoBreak('[$name] Writing single item');
-    final singleWriteDuration = await runTimed(() async {
+    final singleWriteDurationInMs = await runTimed(() async {
       await storage.setString('single_key', data);
     });
-    print(' - ${singleWriteDuration.inMilliseconds} ms');
+    print(' - $singleWriteDurationInMs ms');
 
     // Get file size
     final file = File(path.join((await getApplicationSupportDirectory()).path, 'shared_preferences.json'));
@@ -47,20 +47,20 @@ class SharedPreferencesRunner extends BenchmarkRunner {
 
     // Reload storage
     printNoBreak('[$name] Reloading storage');
-    final reloadDuration = await runTimed(() async {
+    final reloadDurationInMs = await runTimed(() async {
       storage = await SharedPreferences.getInstance();
       //TODO remove ?    await storage.reload();
     });
-    print(' - ${reloadDuration.inMilliseconds} ms');
+    print(' - $reloadDurationInMs ms');
 
     // Read
     printNoBreak('[$name] Reading $operations items');
-    final readDuration = await runTimed(() async {
+    final readDurationInMs = await runTimed(() async {
       for (final key in keys) {
         storage.getString(key);
       }
     });
-    print(' - ${readDuration.inMilliseconds} ms');
+    print(' - $readDurationInMs ms');
 
     // Close storage
     print('[$name] Done, closing storage');
@@ -68,10 +68,10 @@ class SharedPreferencesRunner extends BenchmarkRunner {
 
     // Return results
     return BenchResult(
-      writeDuration: writeDuration,
-      singleWriteDuration: singleWriteDuration,
-      reloadDuration: reloadDuration,
-      readDuration: readDuration,
+      writeDurationInMs: writeDurationInMs,
+      singleWriteDurationInMs: singleWriteDurationInMs,
+      reloadDurationInMs: reloadDurationInMs,
+      readDurationInMs: readDurationInMs,
       fileSizeInBytes: fileSize,
     );
   }
