@@ -89,7 +89,7 @@ class HiveRunner extends BenchmarkRunner {
       singleWriteDurationInMs: singleWriteDurationInMs,
       reloadDurationInMs: reloadDurationInMs,
       readDurationInMs: readDurationInMs,
-      streamMeanDurationInMs: streamDurationsInMs.mean,
+      streamDurationStatsInMs: streamDurationsInMs,
       fileSizeInBytes: sizeInBytes,
     );
   }

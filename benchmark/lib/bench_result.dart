@@ -1,10 +1,12 @@
+import 'runners/_runner.dart';
+
 class BenchResult {
   const BenchResult({
     required this.writeDurationInMs,
     required this.singleWriteDurationInMs,
     required this.reloadDurationInMs,
     required this.readDurationInMs,
-    this.streamMeanDurationInMs,
+    this.streamDurationStatsInMs,
     required this.fileSizeInBytes,
   });
 
@@ -12,10 +14,10 @@ class BenchResult {
   final int singleWriteDurationInMs;
   final int reloadDurationInMs;
   final int readDurationInMs;
-  final int? streamMeanDurationInMs;
+  final DurationStats? streamDurationStatsInMs;
   final int fileSizeInBytes;
 
-  int get totalDurationInMs => writeDurationInMs + singleWriteDurationInMs + reloadDurationInMs + readDurationInMs + (streamMeanDurationInMs ?? 0);
+  int get totalDurationInMs => writeDurationInMs + singleWriteDurationInMs + reloadDurationInMs + readDurationInMs + (streamDurationStatsInMs?.mean ?? 0);
   double get fileSizeInMB => fileSizeInBytes / (1024 * 1024);
   String get fileSizeDisplay => '${fileSizeInMB.toStringAsFixed(1)} MB';
 }
