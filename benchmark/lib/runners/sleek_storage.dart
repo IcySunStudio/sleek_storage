@@ -5,7 +5,7 @@ import 'package:sleek_storage_benchmark/bench_result.dart';
 
 import 'package:path_provider/path_provider.dart';
 
-import 'runner.dart';
+import '_runner.dart';
 
 class SleekStorageRunner extends BenchmarkRunner {
   const SleekStorageRunner();

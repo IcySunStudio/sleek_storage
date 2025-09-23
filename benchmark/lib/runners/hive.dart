@@ -7,7 +7,7 @@ import 'package:sleek_storage_benchmark/bench_result.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-import 'runner.dart';
+import '_runner.dart';
 
 class HiveRunner extends BenchmarkRunner {
   const HiveRunner();
