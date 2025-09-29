@@ -107,18 +107,39 @@ for (...) {
 
 ---
 
-## Benchmark
-This table shows write times, reload times, read times, and file sizes at different operation scales.
+## Benchmarks
+Tables shows write times, reload times, read times, and file sizes at different operation scales.
 
-| Operations | Competitor | Write (ms) | Reload (ms) | Read (ms) | File Size (MB) |
-|------------|------------|------------|-------------|-----------|---------------|
-| 1,000      | Sleek Storage | 41        | 25          | 0         | 0.5 MB        |
-| 1,000      | Hive CE     | 17        | 17          | 0         | 0.4 MB        |
-| 1,000      | Shared Preferences | 9908      | 0           | 0         | 0.5 MB        |
-| 100,000    | Sleek Storage | 1747      | 1599        | 12        | 50.2 MB       |
-| 100,000    | Hive CE     | 485       | 377         | 88        | 43.4 MB       |
+### 1,000 operations
+| Competitor          | Write (ms) | Reload (ms) | Read (ms) | File Size (MB) |
+|---------------------|------------|-------------|-----------|----------------|
+| Sleek Storage       | 43         | 20          | 0         | 0.5 MB         |
+| Shared Preferences  | 10366      | 0           | 0         | 0.5 MB         |
+| Hive CE             | 22         | 22          | 1         | 0.4 MB         |
+| Drift               | 265        | 0           | 111       | 0.4 MB         |
 
-**Bottom Line:** Sleek Storage delivers performance that is comparable to Hive for most use cases. Hive still leads in raw speed for large datasets. Shared Preferences, however, falls significantly behind in write performance.
+### 100,000 operations
+| Competitor     | Write (ms) | Reload (ms) | Read (ms) | File Size (MB) |
+|----------------|------------|-------------|-----------|----------------|
+| Sleek Storage  | 1747       | 1599        | 12        | 50.2 MB        |
+| Hive CE        | 485        | 377         | 88        | 43.4 MB        |
+| Drift          | 1036       | 0           | 452       | 43.5 MB        |
+
+### Stream performance, write-to-emit latency
+This test measures the time taken from a write operation to the corresponding event being emitted on a watch stream.
+A too long latency can lead to janky UI updates in reactive apps.
+On modern desktop hardware, this is negligible for all competitors.
+
+Results on an old Android 9 (Nokia 6) phone:
+
+| Competitor     | Write-to-emit (ms)            |
+|----------------|-------------------------------|
+| Sleek Storage  | min: 0, max: 38, average: 4   |
+| Hive CE        | min: 0, max: 20, average: 2   |
+| Drift          | min: 7, max: 195, average: 28 |
+
+### Bottom Line
+Sleek Storage delivers performance that is comparable to Hive for most use cases. Hive still leads in raw speed for large datasets. Shared Preferences, however, falls significantly behind in write performance. Drift is somewhat in the middle, and has a quite low Stream performance.
 
 **Notes:**
 - Tested on June 2025, on Windows 11, with an AMD 3900X CPU and NVMe SSD drive.
@@ -126,6 +147,11 @@ This table shows write times, reload times, read times, and file sizes at differ
 - Reload time is the time taken to read all data from disk into memory (usually done at app startup).
 - Uses batched writes when available.
 - Code is available in the benchmark folder.
+
+** Limitations:**
+- Due to the structure of Sleek Storage, writing a single item in a large collection take the same time as writing them all at once. But if you don't await write operations, this is not a problem in practice.
+- On modern desktop hardware, Sleek Storage is very fast, but you should keep store size under 50,000 items for best performance.
+- On old Android hardware, Sleek Storage is still fast, but you should keep store size under 10,000 items.
 
 ---
 
